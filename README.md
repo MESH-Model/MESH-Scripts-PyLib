@@ -98,50 +98,39 @@ Example Usage\
 `flagged_gdf = flag_ncaalg_from_files('path/to/shapefile1.shp', 'path/to/shapefile2.shp', threshold=0.1, output_path='output.shp')`
 
 Functions:
-- flag_ncaalg: Flags non-contributing areas based on the intersection area between polygons.
-- flag_ncaalg_from_files: Reads two shapefiles, sets their CRS, and applies flag_ncaalg.
-- 
+- `flag_ncaalg`: Flags non-contributing areas based on the intersection area between polygons.
+- `flag_ncaalg_from_files`: Reads two shapefiles, sets their CRS, and applies `flag_ncaalg`.
+
 ## NetCDF File Generation
 
 NetCDFWriter.py contains a class NetCDFWriter that creates NetCDF files with processed soil data merged from shapefiles and NetCDF drainage databases.
 
-Example Usage
-python
-Copy code
-from MESHpyPreProcessing.NetCDFWriter import NetCDFWriter
-
-# Initialize the NetCDFWriter class
-writer = NetCDFWriter(nc_filename='output.nc', shapefile_path='path/to/shapefile.shp', input_ddb_path='path/to/input_ddb.nc')
-
-# Read the shapefile and set coordinates from the NetCDF drainage database
-writer.read_shapefile()
-writer.set_coordinates()
-
-# Set the number of soil layers
-writer.set_num_soil_layers(3)
-
-# Define properties and variable information
-properties = {
+Example Usage\
+`from MESHpyPreProcessing.NetCDFWriter import NetCDFWriter`\
+- Initialize the NetCDFWriter class\
+`writer = NetCDFWriter(nc_filename='output.nc', shapefile_path='path/to/shapefile.shp', input_ddb_path='path/to/input_ddb.nc')`
+- Read the shapefile and set coordinates from the NetCDF drainage database\
+`writer.read_shapefile()`\
+`writer.set_coordinates()`
+- Set the number of soil layers\
+`writer.set_num_soil_layers(3)`
+- Define properties and variable information\
+`properties = {
     'layer_dependent': ['OC', 'Sand'],
     'layer_independent': ['Drainage_Area']
-}
-variable_info = {
+}`\
+`variable_info = {
     'OC': ('OrganicCarbon', 'f4', 'kg/m^2'),
     'Sand': ('SandContent', 'f4', '%'),
     'Drainage_Area': ('DrainageArea', 'f4', 'km^2')
-}
-
-# Write data to NetCDF
-writer.write_netcdf(properties, variable_info)
+}`
+- Write data to NetCDF
+`writer.write_netcdf(properties, variable_info)`\
 Functions:
-read_shapefile: Reads the shapefile and prepares the GeoDataFrame.
-set_coordinates: Extracts longitude and latitude from the NetCDF drainage database.
-set_num_soil_layers: Sets the number of soil layers for the NetCDF file.
-write_netcdf: Writes processed data to a NetCDF file.
-Contributing
+- `read_shapefile`: Reads the shapefile and prepares the GeoDataFrame.
+- `set_coordinates`: Extracts longitude and latitude from the NetCDF drainage database.
+- `set_num_soil_layers`: Sets the number of soil layers for the NetCDF file.
+- `write_netcdf`: Writes processed data to a NetCDF file.
+
+## Contributing
 If you'd like to contribute to this project, feel free to fork the repository and submit a pull request with your improvements.
-
-csharp
-Copy code
-
-You can copy and paste this into your `README.md` file on GitHub directly!
