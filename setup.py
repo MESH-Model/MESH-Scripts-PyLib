@@ -16,7 +16,7 @@ setup(
     description='Python package for processing and analyzing hydrological data.',
     author='Fuad Yassin',
     author_email='fuad.yassin@usask.ca',
-    url='https://github.com/fuadyassin/meshpyProcessing',
+    url='https://github.com/MESH-Model/MESH-Scripts-PyLib',
     classifiers=[
         'Programming Language :: Python :: 3',
         'License :: OSI Approved :: MIT License',
