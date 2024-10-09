@@ -126,6 +126,7 @@ Example Usage\
 }`
 - Write data to NetCDF
 `writer.write_netcdf(properties, variable_info)`\
+
 Functions:
 - `read_shapefile`: Reads the shapefile and prepares the GeoDataFrame.
 - `set_coordinates`: Extracts longitude and latitude from the NetCDF drainage database.
