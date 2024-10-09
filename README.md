@@ -6,7 +6,7 @@
 You can install the package using pip:
 
 ```bash
-pip install git+https://github.com/fuadyassin/meshpyProcessing.git
+pip install git+https://github.com/MESH-Model/MESH-Scripts-PyLib.git
 ```
 # Streamflow file preparation
 
