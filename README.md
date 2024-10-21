@@ -49,8 +49,8 @@ Example Usage\
 - Combine the data\
 `combined_data = pd.merge(combined_data_ca, combined_data_us, on='Date', how='outer')`
 - Write to files in OBSTXT and ENSIM formats\
-`gen_flow.write_flow_data_to_file_obstxt('output.txt', combined_data, station_info_ca + station_info_us)`\
-`gen_flow.write_flow_data_to_file_ensim('output_ensim.txt', combined_data, station_info_ca + station_info_us)`
+`gen_flow.write_flow_data_to_file_obstxt('MESH_input_streamflow.txt', combined_data, station_info_ca + station_info_us)`\
+`gen_flow.write_flow_data_to_file_ensim('MESH_input_streamflow.tb0', combined_data, station_info_ca + station_info_us)`
 
 Functions:
 - `fetch_hydrometric_data_ca`: Fetches flow data from Canadian stations.
