@@ -89,24 +89,65 @@ Functions:
 
 ## Spatial Analysis
 
-`gdf_edit.py` provides functions to flag non-contributing areas (NCAs) in GeoDataFrames.
+`gdf_edit.py` provides functions to flag non-contributing areas (NCAs) or lakes and reservoirs in GeoDataFrames based on intersection thresholds, with customizable options for column names, default values, and initialization values.
 
-Example Usage\
-`from MESHpyPreProcessing.gdf_edit import flag_ncaalg_from_files`
+### Example Usage
 
-- Flag non-contributing areas based on intersection thresholds\
-`flagged_gdf = flag_ncaalg_from_files('path/to/shapefile1.shp', 'path/to/shapefile2.shp', threshold=0.1, output_path='output.shp')`
+### 1. Using Shapefiles
 
-Functions:
-- `flag_ncaalg`: Flags non-contributing areas based on the intersection area between polygons.
-- `flag_ncaalg_from_files`: Reads two shapefiles, sets their CRS, and applies `flag_ncaalg`.
+```python
+from MESHpyPreProcessing.gdf_edit import flag_ncaalg_from_files
+
+# Flag areas based on intersection thresholds with default settings
+flagged_gdf = flag_ncaalg_from_files(
+    'path/to/shapefile1.shp', 
+    'path/to/shapefile2.shp', 
+    threshold=0.1, 
+    output_path='output.shp'
+)
+
+# Flag areas using specific value column from gdf2 and custom initialization value
+flagged_gdf = flag_ncaalg_from_files(
+    'path/to/shapefile1.shp', 
+    'path/to/shapefile2.shp', 
+    threshold=0.1, 
+    output_path='output.shp', 
+    ncontr_col="custom_flag_column",   # Custom column in gdf1 to store flags
+    value_column="NON_ID",             # Column in gdf2 with values to assign
+    initial_value=0,                   # Initial value for gdf1's flag column
+    default_value=5                    # Default value if no value_column specified
+)
+```
+### 2. Using GeoDataFrames Directly
+```python
+from MESHpyPreProcessing.gdf_edit import flag_ncaalg
+
+# Load GeoDataFrames
+import geopandas as gpd
+gdf1 = gpd.read_file('path/to/shapefile1.shp')
+gdf2 = gpd.read_file('path/to/shapefile2.shp')
+
+# Flag areas with default settings (constant value of 2)
+flagged_gdf = flag_ncaalg(gdf1, gdf2, threshold=0.1)
+
+# Flag using specific value column from gdf2 and custom initialization value
+flagged_gdf = flag_ncaalg(
+    gdf1, 
+    gdf2, 
+    threshold=0.1, 
+    ncontr_col="custom_flag_column",   # Custom column in gdf1 to store flags
+    value_column="NON_ID",             # Column in gdf2 with values to assign
+    initial_value=0,                   # Initial value for gdf1's flag column
+    default_value=5                    # Default value if no value_column specified
+)
+```
 
 ## NetCDF File Generation
 
 NetCDFWriter.py contains a class NetCDFWriter that creates NetCDF files with processed soil data merged from shapefiles and NetCDF drainage databases.
 
 Example Usage\
-`from MESHpyPreProcessing.NetCDFWriter import NetCDFWriter`\
+`from MESHpyPreProcessing.NetCDFWriter import NetCDFWriter`
 - Initialize the NetCDFWriter class\
 `writer = NetCDFWriter(nc_filename='output.nc', shapefile_path='path/to/shapefile.shp', input_ddb_path='path/to/input_ddb.nc')`
 - Read the shapefile and set coordinates from the NetCDF drainage database\
@@ -125,7 +166,7 @@ Example Usage\
     'Drainage_Area': ('DrainageArea', 'f4', 'km^2')
 }`
 - Write data to NetCDF
-`writer.write_netcdf(properties, variable_info)`\
+`writer.write_netcdf(properties, variable_info)`
 
 Functions:
 - `read_shapefile`: Reads the shapefile and prepares the GeoDataFrame.
