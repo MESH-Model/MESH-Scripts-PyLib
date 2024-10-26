@@ -8,7 +8,8 @@ def flag_ncaalg(
     output_path: str = None,
     ncontr_col: str = "ncontr",  # User-defined column name for flag in gdf1
     value_column: str = None,    # Optional column in gdf2 for dynamic values
-    initial_value=None           # Initial value for the ncontr_col in gdf1
+    initial_value=None,          # Initial value for the ncontr_col in gdf1
+    default_value=2              # Default value for intersections if value_column is None
 ) -> gpd.GeoDataFrame:
     """
     Flag intersections and optionally assign values from gdf2.
@@ -31,9 +32,11 @@ def flag_ncaalg(
     ncontr_col : str, optional
         The name of the column to store assigned values in gdf1.
     value_column : str, optional
-        The name of the column in gdf2 with values to assign to gdf1. If None, a constant value (2) is used.
+        The name of the column in gdf2 with values to assign to gdf1. If None, a constant value (default_value) is used.
     initial_value : optional
         The initial value to assign to the ncontr_col column in gdf1 before processing intersections.
+    default_value : optional
+        The default value to assign to the ncontr_col column if value_column is None (default is 2).
 
     Returns
     -------
@@ -62,8 +65,8 @@ def flag_ncaalg(
             intersection_area = row['geometry'].intersection(match['geometry']).area
             area_fraction = intersection_area / row['geometry'].area
             if area_fraction > threshold:
-                # Assign either a constant value or a value from gdf2's value_column
-                gdf1.at[index, ncontr_col] = match[value_column] if value_column else 2
+                # Assign either a value from gdf2's value_column or the default value
+                gdf1.at[index, ncontr_col] = match[value_column] if value_column else default_value
                 break  # Use only the first valid intersection to assign the value
                 
     # Save the modified gdf1 to a new shapefile if an output path is provided
@@ -79,7 +82,8 @@ def flag_ncaalg_from_files(
     output_path: str = None,
     ncontr_col: str = "ncontr",  # User-defined column name for flag in gdf1
     value_column: str = None,    # Optional column in gdf2 for dynamic values
-    initial_value=None           # Initial value for the ncontr_col in gdf1
+    initial_value=None,          # Initial value for the ncontr_col in gdf1
+    default_value=2              # Default value for intersections if value_column is None
 ) -> gpd.GeoDataFrame:
     """
     Read two shapefiles, set their CRS to EPSG:4326, and apply the `flag_ncaalg` function.
@@ -101,6 +105,8 @@ def flag_ncaalg_from_files(
         The name of the column in gdf2 with values to assign to gdf1.
     initial_value : optional
         The initial value to assign to the ncontr_col column in gdf1 before processing intersections.
+    default_value : optional
+        The default value to assign to the ncontr_col column if value_column is None (default is 2).
 
     Returns
     -------
@@ -115,8 +121,8 @@ def flag_ncaalg_from_files(
     gdf1.to_crs(epsg=4326, inplace=True)
     gdf2.to_crs(epsg=4326, inplace=True)
 
-    # Call the original flag_ncaalg function with the specified column name, value column, and initial value
-    return flag_ncaalg(gdf1, gdf2, threshold, output_path, ncontr_col, value_column, initial_value)
+    # Call the original flag_ncaalg function with the specified column name, value column, initial value, and default value
+    return flag_ncaalg(gdf1, gdf2, threshold, output_path, ncontr_col, value_column, initial_value, default_value)
 
 # Examples:
 
@@ -131,3 +137,9 @@ def flag_ncaalg_from_files(
 
 # 4. Using a value column from gdf2 with initial value set to 0:
 # flagged_gdf = flag_ncaalg_from_files(input_basin_path, nctr_test, threshold=0.1, output_path=output_river_path, value_column="NON_ID", initial_value=0)
+
+# 5. Default usage with custom default value of 3:
+# flagged_gdf = flag_ncaalg_from_files(input_basin_path, nctr_test, threshold=0.1, output_path=output_river_path, default_value=3)
+
+# 6. Using a value column with custom default value of 5 if no value column is provided:
+# flagged_gdf = flag_ncaalg_from_files(input_basin_path, nctr_test, threshold=0.1, output_path=output_river_path, value_column="NON_ID", default_value=5)
