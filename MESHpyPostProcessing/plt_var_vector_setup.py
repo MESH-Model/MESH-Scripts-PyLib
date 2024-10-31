@@ -1,9 +1,10 @@
-import geopandas as gpd
+import geopandas as gpd 
 import pandas as pd
 import matplotlib.pyplot as plt
 import netCDF4 as nc
 import matplotlib.colors as mcolors
 import math
+import numpy as np
 
 def plt_var_from_vector_ddb_netcdf(
     output_basin_path, 
@@ -13,53 +14,20 @@ def plt_var_from_vector_ddb_netcdf(
     text_location=(0.55, 0.95), 
     font_size=10,
     cmap='viridis',  # Set the default colormap to 'viridis'
-    cbar_location=[0.96, 0.15, 0.02, 0.7]  # Set default colorbar location
+    cbar_location=[0.96, 0.15, 0.02, 0.7],  # Set default colorbar location
+    subplot_adjustments=None,  # Optional: Custom subplot adjustments
+    subbasin_var='subbasin',  # Default to 'subbasin'
+    comid_var='COMID',  # Default to 'COMID'
+    landuse_classes=None  # Optional land use classes as a numpy array or list
 ):
-    """
-    Plots a specified variable from a NetCDF file, with support for variables
-    dependent only on subbasin or on both subbasin and NGRU.
-
-    Parameters:
-    - output_basin_path (str): Path to the shapefile containing the basin data.
-    - ddbnetcdf_path (str): Path to the NetCDF file containing the data.
-    - variable_name (str): Name of the variable to plot from the NetCDF file.
-    - save_path (str): File path where the plot will be saved. Defaults to 'plot.png'.
-    - text_location (tuple): Tuple specifying the x and y location of the percentage text in each subplot. Defaults to (0.55, 0.95).
-    - font_size (int): Font size for the titles and percentage text. Defaults to 10.
-    - cmap (str or Colormap): Colormap to use for plotting. Defaults to 'viridis'.
-    - cbar_location (list): List specifying the colorbar location [left, bottom, width, height]. Defaults to [0.96, 0.15, 0.02, 0.7].
-
-    Returns:
-    - None: The function saves the plot to the specified path.
-
-    Usage:
-    ```
-    output_basin_path = '/path/to/basin/shapefile.shp'
-    ddbnetcdf_path = '/path/to/drainage_database.nc'
-    variable_name = 'DA'  # or any other variable in the NetCDF file
-    save_path = '/path/to/save/plot.png'
-
-    plt_var_from_vector_ddb_netcdf(
-        output_basin_path, 
-        ddbnetcdf_path, 
-        variable_name, 
-        save_path,
-        text_location=(0.55, 0.95),
-        font_size=12,
-        cmap='viridis',  # You can specify a different colormap here if needed
-        cbar_location=[0.96, 0.15, 0.02, 0.7]  # Custom colorbar location if needed
-    )
-    ```
-    """
-    
-    # Load and dissolve the shapefile to get a single boundary
+    # Load and dissolve the shapefile to get a single boundary sub_agg_gdf
     sub_agg_gdf = gpd.read_file(output_basin_path).to_crs(epsg=4326)
     dissolved_basin = sub_agg_gdf.dissolve().boundary
 
     # Load NetCDF data
     with nc.Dataset(ddbnetcdf_path) as dataset:
         variable_data = dataset.variables[variable_name][:]
-        subbasin_ids = dataset.variables['subbasin'][:].astype(int)
+        subbasin_ids = dataset.variables[subbasin_var][:].astype(int)  # Use subbasin_var argument
         variable_units = dataset.variables[variable_name].units  # Retrieve the units
         
         # Extract latitude and longitude data
@@ -68,14 +36,14 @@ def plt_var_from_vector_ddb_netcdf(
         
         # Check the dimensions of the variable
         dims = dataset.variables[variable_name].dimensions
-        
+
         if len(dims) == 1:  # Case where the variable only depends on subbasin
             df = pd.DataFrame({
                 variable_name: variable_data, 
                 'lat': latitudes, 
                 'lon': longitudes
             }, index=subbasin_ids)
-            sub_agg_ddb_merged_gdf = sub_agg_gdf.merge(df, left_on='COMID', right_index=True, how='left')
+            sub_agg_ddb_merged_gdf = sub_agg_gdf.merge(df, left_on=comid_var, right_index=True, how='left')
 
             # Calculate vmin and vmax based on the variable's data range
             vmin = sub_agg_ddb_merged_gdf[variable_name].min()
@@ -90,14 +58,21 @@ def plt_var_from_vector_ddb_netcdf(
             ax.set_ylabel('Latitude', fontsize=font_size)
 
             # Plot the dissolved basin boundary on top without lat/lon axes
-            dissolved_basin.plot(ax=ax, edgecolor='black', linewidth=1)
+            dissolved_basin.plot(ax=ax, edgecolor='black', linewidth=1, facecolor='none')
 
         elif len(dims) == 2 and dims[1] == 'NGRU':  # Case where the variable depends on subbasin and NGRU
-            # Extract land use classes
-            landuse_classes = dataset.variables['LandUse'][:]
+            # Use provided landuse_classes if available; otherwise, read from the NetCDF file
+            if landuse_classes is not None:
+                landuse_classes = np.array(landuse_classes)  # Ensure it's a numpy array for compatibility
+            else:
+                landuse_classes = dataset.variables['LandUse'][:]
+            
+            # Print type and value of landuse_classes
+            print("Type of landuse_classes:", type(landuse_classes))
+            print("Value of landuse_classes:", landuse_classes)
             
             df = pd.DataFrame({landuse: variable_data[:, i] for i, landuse in enumerate(landuse_classes)}, index=subbasin_ids)
-            sub_agg_ddb_merged_gdf = sub_agg_gdf.merge(df, left_on='COMID', right_index=True, how='left')
+            sub_agg_ddb_merged_gdf = sub_agg_gdf.merge(df, left_on=comid_var, right_index=True, how='left')
 
             # Pre-calculate the percentage values for each landuse class
             percentage_pairs = [(landuse, round(sub_agg_ddb_merged_gdf[landuse].sum() / len(sub_agg_ddb_merged_gdf) * 100, 3)) for landuse in landuse_classes]
@@ -140,7 +115,7 @@ def plt_var_from_vector_ddb_netcdf(
                 sub_agg_ddb_merged_gdf.plot(column=col, ax=ax, cmap=cmap, vmin=0.01, vmax=1)
 
                 # Plot the dissolved basin boundary on top
-                dissolved_basin.plot(ax=ax, edgecolor='black', linewidth=1)
+                dissolved_basin.plot(ax=ax, edgecolor='black', linewidth=1, facecolor='none')
 
                 # Convert title to two lines
                 title = split_title(col)
@@ -159,11 +134,9 @@ def plt_var_from_vector_ddb_netcdf(
         else:
             raise ValueError(f"Unsupported variable dimensions for plotting: {dims}")
 
-    # Adjust layout and place colorbar if needed
-    try:
-        fig.tight_layout(pad=1.0)
-    except ValueError as e:
-        print(f"Warning: Could not adjust layout due to an error: {e}")
+    # Adjust layout using subplots_adjust if provided
+    if subplot_adjustments:
+        fig.subplots_adjust(**subplot_adjustments)
 
     # Add colorbar for both single-dimensional and two-dimensional variables
     cbar_ax = fig.add_axes(cbar_location)
@@ -172,11 +145,11 @@ def plt_var_from_vector_ddb_netcdf(
         sm = plt.cm.ScalarMappable(cmap=cmap, norm=mcolors.Normalize(vmin=vmin, vmax=vmax))
     else:
         # For 2D variables, use fixed 0 to 1 range
-        sm = plt.cm.ScalarMappable(cmap=cmap, norm=mcolors.Normalize(vmin=0.01, vmax=1))
+        sm = plt.cm.ScalarMappable(cmap=cmap, norm=mcolors.Normalize(vmin=0.001, vmax=1))
     
     sm._A = []
     cbar = fig.colorbar(sm, cax=cbar_ax)
-    cbar.ax.tick_params(labelsize=12)
+    cbar.ax.tick_params(labelsize=10)
     cbar.set_label(f'{variable_name} ({variable_units})', fontsize=font_size)  # Add units to the colorbar
 
     # Save the figure
@@ -184,6 +157,7 @@ def plt_var_from_vector_ddb_netcdf(
 
     # Show the plot
     plt.show()
+
 
 def plt_var_from_vector_params_netcdf(
     output_basin_path, 
