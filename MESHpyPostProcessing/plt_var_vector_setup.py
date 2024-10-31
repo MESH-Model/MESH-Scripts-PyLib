@@ -18,7 +18,9 @@ def plt_var_from_vector_ddb_netcdf(
     subplot_adjustments=None,  # Optional: Custom subplot adjustments
     subbasin_var='subbasin',  # Default to 'subbasin'
     comid_var='COMID',  # Default to 'COMID'
-    landuse_classes=None  # Optional land use classes as a numpy array or list
+    landuse_classes=None,  # Optional land use classes as a numpy array or list
+    grudim = 'NGRU',    #from netcdf ddb
+    grunames_var = 'LandUse'  #from netcdf ddb
 ):
     # Load and dissolve the shapefile to get a single boundary sub_agg_gdf
     sub_agg_gdf = gpd.read_file(output_basin_path).to_crs(epsg=4326)
@@ -60,12 +62,12 @@ def plt_var_from_vector_ddb_netcdf(
             # Plot the dissolved basin boundary on top without lat/lon axes
             dissolved_basin.plot(ax=ax, edgecolor='black', linewidth=1, facecolor='none')
 
-        elif len(dims) == 2 and dims[1] == 'NGRU':  # Case where the variable depends on subbasin and NGRU
+        elif len(dims) == 2 and dims[1] == grudim:  # Case where the variable depends on subbasin and NGRU
             # Use provided landuse_classes if available; otherwise, read from the NetCDF file
             if landuse_classes is not None:
                 landuse_classes = np.array(landuse_classes)  # Ensure it's a numpy array for compatibility
             else:
-                landuse_classes = dataset.variables['LandUse'][:]
+                landuse_classes = dataset.variables[grunames_var][:]
             
             # Print type and value of landuse_classes
             print("Type of landuse_classes:", type(landuse_classes))
