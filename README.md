@@ -10,6 +10,7 @@ A Python library for preprocessing hydrometric and soil data, performing spatial
 - [Soil Data Processing (`gsde_soil.py`)](#soil-data-processing)
 - [Spatial Analysis (`gdf_edit.py`)](#spatial-analysis)
 - [NetCDF File Generation (`NetCDFWriter.py`)](#netcdf-file-generation)
+- [Plot Variable from Vector setup (`plt_var_vector_setup.py`)](#plot-variable-from-vector-setup)
 - [Contributing](#contributing)
 
 ## Installation
@@ -174,5 +175,77 @@ Functions:
 - `set_num_soil_layers`: Sets the number of soil layers for the NetCDF file.
 - `write_netcdf`: Writes processed data to a NetCDF file.
 
+## Plot Variable from Vector setup
+`plt_var_from_vector_ddb_netcdf`, designed to plot spatial data from a vector drainage database in NetCDF format. 
+The function generates a map showing specific variables within a watershed basin or across various land use classes, 
+with options for custom color maps, subplot adjustments, and other visual enhancements.
+### Example Usage
+
+### 1. Plotting drainage database variables
+
+Plots a specified variable from a NetCDF file, supporting variables dependent on subbasin or both subbasin and grouped response units (NGRU).
+
+### Parameters
+- **output_basin_path (str)**: Path to the shapefile containing the basin data.
+- **ddbnetcdf_path (str)**: Path to the NetCDF file containing the drainage database.
+- **variable_name (str)**: Name of the variable to plot from the NetCDF file (e.g., 'GRU').
+- **save_path (str)**: Path where the plot will be saved (e.g., 'output/plot.png').
+- **text_location (tuple)**: Coordinates for percentage text in subplots, default is `(0.55, 0.95)`.
+- **font_size (int)**: Font size for text elements, default is `10`.
+- **cmap (str or Colormap)**: Colormap for plotting (e.g., 'gnuplot2_r'), default is 'viridis'.
+- **cbar_location (list)**: List specifying the colorbar position `[left, bottom, width, height]`.
+- **subplot_adjustments (dict)**: Dictionary for subplot adjustments like spacing.
+- **subbasin_var (str)**: Subbasin identifier in the NetCDF, default is `'subbasin'`.
+- **comid_var (str)**: COMID identifier in the shapefile for merging, default is `'COMID'`.
+- **landuse_classes (list or None)**: Optional; custom list of land use classes. If not provided, it defaults to the variable 'LandUse' from the NetCDF file.
+- **grudim (str)**: Specifies the GRU dimension variable in the NetCDF (e.g., `'NGRU'`).
+- **grunames_var (str)**: Specifies the land use names variable in the NetCDF (e.g., `'LandUse'`).
+
+## Example Usage
+
+Below is an example of how to configure and use `plt_var_from_vector_ddb_netcdf` for a specific project setup.
+
+```python
+from MESHpyPostProcessing.plt_var_vector_setup import plt_var_from_vector_ddb_netcdf
+import os
+
+# Define base directory paths
+base_scratch_dir = '/scratch/fuaday/sras-agg-model_1'
+output_basin_path = os.path.join(base_scratch_dir, 'geofabric-outputs/sras_subbasins_MAF_Agg.shp')
+ddbnetcdf_path = os.path.join(base_scratch_dir, 'MESH-sras-agg/MESH_drainage_database.nc')
+
+# Specify custom land use classes (optional)
+lclass = [
+    'Temperate or sub-polar needleleaf forest', 'Sub-polar taiga needleleaf forest',
+    'Temperate or sub-polar broadleaf deciduous forest', 'Mixed forest',
+    'Temperate or sub-polar shrubland', 'Temperate or sub-polar grassland',
+    'Sub-polar or polar grassland-lichen-moss', 'Wetland', 'Cropland',
+    'Barren lands', 'Urban', 'Water', 'Dump'
+]
+
+# Variable name to plot
+variable_name = 'GRU'
+
+# Path to save the plot
+save_path = os.path.join(base_scratch_dir, f'geofabric-outputs/{variable_name}.png')
+
+# Plotting function
+plt_var_from_vector_ddb_netcdf(
+    output_basin_path=output_basin_path, 
+    ddbnetcdf_path=ddbnetcdf_path, 
+    variable_name=variable_name, 
+    save_path=save_path,
+    text_location=(0.55, 0.95),
+    font_size=10,
+    cmap='gnuplot2_r',  # Custom colormap
+    cbar_location=[0.91, 0.15, 0.02, 0.7],  # Adjusted colorbar position
+    subplot_adjustments={'left': 0.1, 'right': 0.9, 'bottom': 0.1, 'top': 0.9, 'wspace': 0.1, 'hspace': 0.2},
+    subbasin_var='subbasin',  # Subbasin identifier
+    comid_var='COMID',  # Shapefile COMID for merging
+    landuse_classes=lclass,  # Optional custom land use classes
+    grudim='NGRU',  # GRU dimension from NetCDF
+    grunames_var='LandUse'  # GRU names variable from NetCDF
+)
+```
 ## Contributing
 If you'd like to contribute to this project, feel free to fork the repository and submit a pull request with your improvements.
