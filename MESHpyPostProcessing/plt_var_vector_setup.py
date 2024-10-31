@@ -45,6 +45,11 @@ def plt_var_from_vector_ddb_netcdf(
                 'lat': latitudes, 
                 'lon': longitudes
             }, index=subbasin_ids)
+            # Check for duplicate columns before merging
+            duplicate_columns = set(df.columns).intersection(set(sub_agg_gdf.columns))
+            if duplicate_columns:
+                raise ValueError(f"Duplicate columns found during merge: {duplicate_columns}")
+
             sub_agg_ddb_merged_gdf = sub_agg_gdf.merge(df, left_on=comid_var, right_index=True, how='left')
 
             # Calculate vmin and vmax based on the variable's data range
@@ -74,6 +79,11 @@ def plt_var_from_vector_ddb_netcdf(
             print("Value of landuse_classes:", landuse_classes)
             
             df = pd.DataFrame({landuse: variable_data[:, i] for i, landuse in enumerate(landuse_classes)}, index=subbasin_ids)
+            # Check for duplicate columns before merging
+            duplicate_columns = set(df.columns).intersection(set(sub_agg_gdf.columns))
+            if duplicate_columns:
+                raise ValueError(f"Duplicate columns found during merge: {duplicate_columns}")
+
             sub_agg_ddb_merged_gdf = sub_agg_gdf.merge(df, left_on=comid_var, right_index=True, how='left')
 
             # Pre-calculate the percentage values for each landuse class
