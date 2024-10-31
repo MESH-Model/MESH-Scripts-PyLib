@@ -35,23 +35,25 @@ This library provides several utilities that streamline data preprocessing for h
 `gen_streamflow_file.py` contains a class `GenStreamflowFile` that handles fetching and combining streamflow data from USGS and Environment Canada and generating output in the OBSTXT and ENSIM formats.
 
 Example Usage  (Please check MESH_streamflowFile_example.ipynb for step by step example) \
-`from MESHpyPreProcessing.gen_streamflow_file import GenStreamflowFile`
-- Initialize the class\
-`gen_flow = GenStreamflowFile()`
-- Define station IDs for Canada and the US\
-`station_ca = ["05GG001", "05AC012"]`\
-`station_us = ["06132200", "05020500"]`
-- Set the date range\
-`start_date = "1980-03-01"`\
-`end_date = "2018-01-10"`
-- Fetch hydrometric data\
-`combined_data_ca, station_info_ca = gen_flow.fetch_hydrometric_data_ca(station_ca, start_date, end_date)`\
-`combined_data_us, station_info_us = gen_flow.extract_flow_data_us(station_us, start_date, end_date)`
-- Combine the data\
-`combined_data = pd.merge(combined_data_ca, combined_data_us, on='Date', how='outer')`
-- Write to files in OBSTXT and ENSIM formats\
-`gen_flow.write_flow_data_to_file_obstxt('MESH_input_streamflow.txt', combined_data, station_info_ca + station_info_us)`\
-`gen_flow.write_flow_data_to_file_ensim('MESH_input_streamflow.tb0', combined_data, station_info_ca + station_info_us)`
+```python
+from MESHpyPreProcessing.gen_streamflow_file import GenStreamflowFile
+#Initialize the class
+gen_flow = GenStreamflowFile()
+# Define station IDs for Canada and the US
+station_ca = ["05GG001", "05AC012"]
+station_us = ["06132200", "05020500"]
+# Set the date range
+start_date = "1980-03-01"
+end_date = "2018-01-10"
+# Fetch hydrometric data
+combined_data_ca, station_info_ca = gen_flow.fetch_hydrometric_data_ca(station_ca, start_date, end_date)
+combined_data_us, station_info_us = gen_flow.extract_flow_data_us(station_us, start_date, end_date)
+# Combine the data\
+combined_data = pd.merge(combined_data_ca, combined_data_us, on='Date', how='outer')
+# Write to files in OBSTXT and ENSIM formats
+gen_flow.write_flow_data_to_file_obstxt('MESH_input_streamflow.txt', combined_data, station_info_ca + station_info_us)
+gen_flow.write_flow_data_to_file_ensim('MESH_input_streamflow.tb0', combined_data, station_info_ca + station_info_us)
+```
 
 Functions:
 - `fetch_hydrometric_data_ca`: Fetches flow data from Canadian stations.
