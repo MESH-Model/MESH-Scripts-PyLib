@@ -9,6 +9,7 @@ A Python library for preprocessing hydrometric and soil data, performing spatial
 - [Streamflow File Preparation (`gen_streamflow_file.py`)](#streamflow-file-preparation)
 - [Soil Data Processing (`gsde_soil.py`)](#soil-data-processing)
 - [Spatial Analysis (`gdf_edit.py`)](#spatial-analysis)
+- [Basin and River Network Aggregation (`merit_basin_aggregation`)](#basin-and-river-network-aggregation)
 - [NetCDF File Generation (`NetCDFWriter.py`)](#netcdf-file-generation)
 - [Plot Variable from Vector setup (`plt_var_vector_setup.py`)](#plot-variable-from-vector-setup)
 - [Contributing](#contributing)
@@ -28,6 +29,7 @@ This library provides several utilities that streamline data preprocessing for h
 - Extraction and processing of streamflow data from Canadian and US hydrometric sources.
 - Soil data loading, merging, and cleaning from CSV files.
 - Flagging non-contributing areas in spatial analysis using GeoDataFrames.
+- Aggregation of basin and river networks with custom thresholds.
 - Writing processed soil data to NetCDF format.
 
 ## Streamflow File Preparation
@@ -143,6 +145,42 @@ flagged_gdf = flag_ncaalg(
     initial_value=0,                   # Initial value for gdf1's flag column
     default_value=5                    # Default value if no value_column specified
 )
+```
+## Basin and River Network Aggregation
+The merit_basin_aggregation function aggregates basin and river network shapefiles. This function uses parameters like minimum sub-area, slope, and river length to iteratively aggregate small sub-basins.
+### Parameters
+- **input_basin**: Basin `GeoDataFrame` with COMID identifiers.
+- **input_river**: River network `GeoDataFrame` with slope and length attributes.
+- **min_subarea**: Minimum area for sub-basins.
+- **min_slope**: Minimum allowable river slope.
+- **min_length**: Minimum river length.
+This function iterates through sub-basins, merging those below the minimum sub-area threshold until no further aggregation is possible. It also computes and adjusts slopes, river lengths, and weighted slopes for simplified river networks.
+
+### Example usage
+```python
+from MESHpyPreProcessing.merit_basin_aggregation import merit_basin_aggregation
+import geopandas as gpd
+import os
+
+# Define paths and parameters
+input_basin_path = "/home/fuaday/github-repos/Souris_Assiniboine_MAF/1-geofabric/SrsAboine-geofabric/sras_subbasins_MAF_noAgg.shp"
+input_river_path = "/home/fuaday/github-repos/Souris_Assiniboine_MAF/1-geofabric/SrsAboine-geofabric/sras_rivers_MAF_noAgg.shp"
+min_subarea = 50
+min_slope = 0.0000001
+min_length = 1.0
+output_basin_path = "/home/fuaday/github-repos/Souris_Assiniboine_MAF/1-geofabric/sras_subbasins_MAF_Agg.shp"
+output_river_path = "/home/fuaday/github-repos/Souris_Assiniboine_MAF/1-geofabric/sras_rivers_MAF_Agg.shp"
+
+# Load input data
+input_basin = gpd.read_file(input_basin_path)
+input_river = gpd.read_file(input_river_path)
+
+# Perform aggregation
+agg_basin, agg_river = merit_basin_aggregation(input_basin, input_river, min_subarea, min_slope, min_length)
+
+# Save aggregated data
+agg_basin.to_file(output_basin_path)
+agg_river.to_file(output_river_path)
 ```
 
 ## NetCDF File Generation
