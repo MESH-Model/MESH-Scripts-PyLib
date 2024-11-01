@@ -3,14 +3,16 @@
 A Python library for preprocessing hydrometric and soil data, performing spatial analysis, and generating NetCDF files for use in hydrological modeling. The package includes utilities for streamflow file preparation, soil data processing, spatial analysis, and NetCDF file generation.
 
 ## Table of Contents
-
+### Installation and Overview
 - [Installation](#installation)
 - [Overview](#overview)
+### PreProcessing
 - [Streamflow File Preparation (`gen_streamflow_file.py`)](#streamflow-file-preparation)
 - [Soil Data Processing (`gsde_soil.py`)](#soil-data-processing)
 - [Spatial Analysis (`gdf_edit.py`)](#spatial-analysis)
 - [Basin and River Network Aggregation (`merit_basin_aggregation`)](#basin-and-river-network-aggregation)
 - [NetCDF File Generation (`NetCDFWriter.py`)](#netcdf-file-generation)
+### PostProcessing
 - [Plot Variable from Vector setup (`plt_var_vector_setup.py`)](#plot-variable-from-vector-setup)
 - [Contributing](#contributing)
 
