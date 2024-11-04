@@ -16,15 +16,13 @@ A Python library for preprocessing hydrometric and soil data, performing spatial
 - [Plot Variable from Vector setup (`plt_var_vector_setup.py`)](#plot-variable-from-vector-setup)
 - [Contributing](#contributing)
 
-## Installation
+## Installation and Overview
 
 You can install the package using pip directly from GitHub:
 
 ```bash
 pip install git+https://github.com/MESH-Model/MESH-Scripts-PyLib.git
 ```
-
-## Overview
 
 This library provides several utilities that streamline data preprocessing for hydrological models like MESH. The key functionalities include:
 
