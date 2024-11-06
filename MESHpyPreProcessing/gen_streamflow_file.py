@@ -19,10 +19,12 @@ class GenStreamflowFile:
         data_dict = {'Date': dates}
         date_index_dict = {str(date.date()): idx for idx, date in enumerate(dates)}
         station_info = []
+        print(len(station_list))
 
+        # Initialize the data dictionary with NaN values for each station
         for station in station_list:
-            data_dict[station] = [np.nan] * len(dates)
-        
+            data_dict[station] = [-1] * len(dates)  # Fill with -1 by default
+
         for station in station_list:
             start_time_station = time.time()
             url = f"https://waterservices.usgs.gov/nwis/dv/?format=json&sites={station}&startDT={start_date}&endDT={end_date}&parameterCd=00060&statCd=00003"
@@ -45,13 +47,10 @@ class GenStreamflowFile:
                     
                     flow_data['dateTime'] = pd.to_datetime(flow_data['dateTime']).dt.date.astype(str)
 
-                    start_time_loop = time.time()
                     for date, flow in zip(flow_data['dateTime'], flow_data['value']):
                         if date in date_index_dict:
                             date_index = date_index_dict[date]
                             data_dict[station][date_index] = flow
-                    end_time_loop = time.time()
-                    print(f"Time taken in the for loop for station {station}: {end_time_loop - start_time_loop} seconds")
                     
                     site_info = time_series['sourceInfo']
                     station_info.append({
@@ -64,9 +63,29 @@ class GenStreamflowFile:
                         'Parameter_Units': parameter_units
                     })
                 else:
-                    print(f"Flow data column not found for station: {station}")
+                    print(f"Flow data not found for station: {station}")
+                    # Append placeholder station info if data not found
+                    station_info.append({
+                        'Station_Number': station,
+                        'Station_Name': "Unknown",
+                        'Latitude': -1,
+                        'Longitude': -1,
+                        'Drainage_Area': None,
+                        'Unit': None,
+                        'Parameter_Units': None
+                    })
             else:
                 print(f"Failed to retrieve data for station: {station}")
+                # Append placeholder station info if request fails
+                station_info.append({
+                    'Station_Number': station,
+                    'Station_Name': "Unknown",
+                    'Latitude': -1,
+                    'Longitude': -1,
+                    'Drainage_Area': None,
+                    'Unit': None,
+                    'Parameter_Units': None
+                })
             
             end_time_station = time.time()
             print(f"Time taken to retrieve data for station {station}: {end_time_station - start_time_station} seconds")
@@ -79,13 +98,14 @@ class GenStreamflowFile:
         data_dict = {'Date': dates}
         date_index_dict = {str(date.date()): idx for idx, date in enumerate(dates)}
         station_info = []
+        print(len(station_numbers))
 
+        # Initialize the data dictionary with -1 values for each station
         for station_number in station_numbers:
-            data_dict[station_number] = [np.nan] * len(dates)
+            data_dict[station_number] = [-1] * len(dates)  # Fill with -1 by default
             
             offset = 0
             full_data = []
-            
             start_time_station = time.time()
             
             while True:
@@ -122,13 +142,10 @@ class GenStreamflowFile:
                 flow_data['value'] = pd.to_numeric(flow_data['value'], errors='coerce')
                 flow_data['Date'] = pd.to_datetime(flow_data['Date']).dt.date.astype(str)
 
-                start_time_loop = time.time()
                 for date, flow in zip(flow_data['Date'], flow_data['value']):
                     if date in date_index_dict:
                         date_index = date_index_dict[date]
                         data_dict[station_number][date_index] = flow
-                end_time_loop = time.time()
-                print(f"Time taken in the for loop for station {station_number}: {end_time_loop - start_time_loop} seconds")
 
                 first_feature = full_data[0]['properties']
                 geometry = full_data[0]['geometry']
@@ -141,13 +158,23 @@ class GenStreamflowFile:
                 })
             else:
                 print(f"Flow data not found for station: {station_number}")
-            
+                # Append placeholder station info if data not found
+                station_info.append({
+                    'Station_Number': station_number,
+                    'Station_Name': "Unknown",
+                    'Latitude': -1,
+                    'Longitude': -1,
+                    'Drainage_Area': None
+                })
+
             end_time_station = time.time()
             print(f"Time taken to retrieve data for station {station_number}: {end_time_station - start_time_station} seconds")
 
         combined_df = pd.DataFrame(data_dict)
         return combined_df, station_info
 
+
+    
     def write_flow_data_to_file_obstxt(self, file_path, flow_data, site_details):
         flow_data = flow_data.fillna(-1.000)
         flow_data['Date'] = pd.to_datetime(flow_data['Date'])
@@ -178,9 +205,16 @@ class GenStreamflowFile:
                 formatted_flow_values = " ".join(f"{x:12.4f}" for x in flow_values)
                 file_conn.write(f"{formatted_flow_values}\n")
 
-    def write_flow_data_to_file_ensim(self, file_path, flow_data, site_details):
+    def write_flow_data_to_file_ensim(self, file_path, flow_data, site_details, column_width=12, initial_spacing=28):
         flow_data = flow_data.fillna(-1.000)
+        
+        num_columns = flow_data.shape[1] - 1  # Exclude date column
 
+        # Ensure site_details length matches the number of data columns
+        if len(site_details) != num_columns:
+            raise ValueError("The number of site details entries must match the number of data columns in flow_data")
+
+        # Header with metadata
         header = [
             "########################################",
             ":FileType tb0  ASCII  EnSim 1.0",
@@ -207,24 +241,124 @@ class GenStreamflowFile:
             ":RoutingDeltaT         1",
             "#",
             ":ColumnMetaData",
-            f"   :ColumnUnits             {' '.join(['m3/s' for _ in range(flow_data.shape[1] - 1)])}",
-            f"   :ColumnType             {' '.join(['float' for _ in range(flow_data.shape[1] - 1)])}",
-            f"   :ColumnName           {' '.join(flow_data.columns[1:])}",
-            "   :ColumnLocationX    " + ' '.join([f"{site['Longitude'] * 60:.6f}" for site in site_details]),
-            "   :ColumnLocationY    " + ' '.join([f"{site['Latitude'] * 60:.6f}" for site in site_details]),
-            f"   :coeff1            {' '.join(['0.0000E+00' for _ in range(flow_data.shape[1] - 1)])}",
-            f"   :coeff2            {' '.join(['0.0000E+00' for _ in range(flow_data.shape[1] - 1)])}",
-            f"   :coeff3            {' '.join(['0.0000E+00' for _ in range(flow_data.shape[1] - 1)])}",
-            f"   :coeff4            {' '.join(['0.0000E+00' for _ in range(flow_data.shape[1] - 1)])}",
-            f"   :Value1            {' '.join(['1' for _ in range(flow_data.shape[1] - 1)])}",
+            f"   :ColumnUnits             {' '.join(['m3/s'.rjust(column_width) for _ in range(num_columns)])}",
+            f"   :ColumnType              {' '.join(['float'.rjust(column_width) for _ in range(num_columns)])}",
+            f"   :ColumnName              {' '.join(name.rjust(column_width) for name in flow_data.columns[1:])}",
+            "   :ColumnLocationX         " + ' '.join([f"{site['Longitude']:.5f}".rjust(column_width) for site in site_details]),
+            "   :ColumnLocationY         " + ' '.join([f"{site['Latitude']:.5f}".rjust(column_width) for site in site_details]),
+            f"   :coeff1                  {' '.join(['0.0000E+00'.rjust(column_width) for _ in range(num_columns)])}",
+            f"   :coeff2                  {' '.join(['0.0000E+00'.rjust(column_width) for _ in range(num_columns)])}",
+            f"   :coeff3                  {' '.join(['0.0000E+00'.rjust(column_width) for _ in range(num_columns)])}",
+            f"   :coeff4                  {' '.join(['0.0000E+00'.rjust(column_width) for _ in range(num_columns)])}",
+            f"   :Value1                  {' '.join(['1'.rjust(column_width) for _ in range(num_columns)])}",
             ":EndColumnMetaData",
             ":endHeader"
         ]
-        
+
+        # Write header and flow data to file
         with open(file_path, "w") as file_conn:
             file_conn.write("\n".join(header) + "\n")
             
             for _, row in flow_data.iterrows():
-                flows = row[1:].values
-                flow_string = " ".join(f"{flow:12.4f}" for flow in flows)
-                file_conn.write(f"{' ' * 22}{flow_string}\n")
+                flows = row[1:].values  # Exclude date
+                flow_string = " ".join(f"{flow:>{column_width}.4f}" for flow in flows)  # Right-aligned values
+                file_conn.write(f"{' ' * initial_spacing}{flow_string}\n")
+
+ 
+    
+    def write_flow_data_to_file_obstxt(self, file_path, flow_data, site_details):
+        flow_data = flow_data.fillna(-1.000)
+        num_columns = flow_data.shape[1] - 1  # Exclude date column
+
+        # Ensure site_details length matches the number of data columns
+        if len(site_details) != num_columns:
+            raise ValueError("The number of site details entries must match the number of data columns in flow_data")
+
+        flow_data['Date'] = pd.to_datetime(flow_data['Date'])
+
+        with open(file_path, "w") as file_conn:
+            start_date = flow_data['Date'].min()
+            end_date = flow_data['Date'].max()
+            file_conn.write(f"Observedstreamflow\t{start_date.strftime('%Y/%m/%d')}\t{end_date.strftime('%Y/%m/%d')}\n")
+            num_stations = flow_data.shape[1] - 1
+            num_days = flow_data.shape[0]
+            start_year = start_date.strftime('%Y')
+            start_day_of_year = start_date.timetuple().tm_yday
+            file_conn.write(f"{num_stations}  {num_days}  {num_days}  24 {start_year}  {start_day_of_year} 00\n")
+            
+            for station_id in flow_data.columns[1:]:
+                station_info = next((item for item in site_details if item["Station_Number"] == station_id), None)
+                if station_info:
+                    lat = station_info['Latitude']
+                    lon = station_info['Longitude']
+                    drainage_area = station_info['Drainage_Area']
+                    if drainage_area is None:
+                        drainage_area = -1.0
+                    station_name = station_info['Station_Name']
+                    file_conn.write(f"{int(lat * 60):4d} {int(lon * 60):4d} {lat:12.6f} {lon:12.6f} {station_id:12s} {float(drainage_area):12.3f} {station_name}\n")
+            
+            for i in range(num_days):
+                flow_values = flow_data.iloc[i, 1:].values
+                formatted_flow_values = " ".join(f"{x:12.4f}" for x in flow_values)
+                file_conn.write(f"{formatted_flow_values}\n")
+
+    def write_flow_data_to_file_ensim(self, file_path, flow_data, site_details, column_width=12, initial_spacing=28):
+        flow_data = flow_data.fillna(-1.000)
+        
+        num_columns = flow_data.shape[1] - 1  # Exclude date column
+
+        # Ensure site_details length matches the number of data columns
+        if len(site_details) != num_columns:
+            raise ValueError("The number of site details entries must match the number of data columns in flow_data")
+
+        # Header with metadata
+        header = [
+            "########################################",
+            ":FileType tb0  ASCII  EnSim 1.0",
+            "#",
+            "# DataType               Time Series",
+            "#",
+            ":Application             EnSimHydrologic",
+            ":Version                 2.1.23",
+            ":WrittenBy          PythonScript",
+            f":CreationDate       {datetime.now().strftime('%Y-%m-%d')}",
+            "#",
+            "#---------------------------------------",
+            ":SourceFile                   flow_data",
+            "#",
+            ":Name               streamflow",
+            "#",
+            ":Projection         LATLONG",
+            ":Ellipsoid          WGS84",
+            "#",
+            f":StartTime          {flow_data['Date'].iloc[0]} 00:00:00.00000",
+            "#",
+            ":AttributeUnits            1.0000000",
+            ":DeltaT               24",
+            ":RoutingDeltaT         1",
+            "#",
+            ":ColumnMetaData",
+            f"   :ColumnUnits             {' '.join(['m3/s'.rjust(column_width) for _ in range(num_columns)])}",
+            f"   :ColumnType              {' '.join(['float'.rjust(column_width) for _ in range(num_columns)])}",
+            f"   :ColumnName              {' '.join(name.rjust(column_width) for name in flow_data.columns[1:])}",
+            "   :ColumnLocationX         " + ' '.join([f"{site['Longitude']:.5f}".rjust(column_width) for site in site_details]),
+            "   :ColumnLocationY         " + ' '.join([f"{site['Latitude']:.5f}".rjust(column_width) for site in site_details]),
+            f"   :coeff1                  {' '.join(['0.0000E+00'.rjust(column_width) for _ in range(num_columns)])}",
+            f"   :coeff2                  {' '.join(['0.0000E+00'.rjust(column_width) for _ in range(num_columns)])}",
+            f"   :coeff3                  {' '.join(['0.0000E+00'.rjust(column_width) for _ in range(num_columns)])}",
+            f"   :coeff4                  {' '.join(['0.0000E+00'.rjust(column_width) for _ in range(num_columns)])}",
+            f"   :Value1                  {' '.join(['1'.rjust(column_width) for _ in range(num_columns)])}",
+            ":EndColumnMetaData",
+            ":endHeader"
+        ]
+
+        # Write header and flow data to file
+        with open(file_path, "w") as file_conn:
+            file_conn.write("\n".join(header) + "\n")
+            
+            for _, row in flow_data.iterrows():
+                flows = row[1:].values  # Exclude date
+                flow_string = " ".join(f"{flow:>{column_width}.4f}" for flow in flows)  # Right-aligned values
+                file_conn.write(f"{' ' * initial_spacing}{flow_string}\n")
+
+                       

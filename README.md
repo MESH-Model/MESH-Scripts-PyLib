@@ -3,26 +3,26 @@
 A Python library for preprocessing hydrometric and soil data, performing spatial analysis, and generating NetCDF files for use in hydrological modeling. The package includes utilities for streamflow file preparation, soil data processing, spatial analysis, and NetCDF file generation.
 
 ## Table of Contents
-
+### Installation and Overview
 - [Installation](#installation)
 - [Overview](#overview)
+### PreProcessing
 - [Streamflow File Preparation (`gen_streamflow_file.py`)](#streamflow-file-preparation)
 - [Soil Data Processing (`gsde_soil.py`)](#soil-data-processing)
 - [Spatial Analysis (`gdf_edit.py`)](#spatial-analysis)
 - [Basin and River Network Aggregation (`merit_basin_aggregation`)](#basin-and-river-network-aggregation)
 - [NetCDF File Generation (`NetCDFWriter.py`)](#netcdf-file-generation)
+### PostProcessing
 - [Plot Variable from Vector setup (`plt_var_vector_setup.py`)](#plot-variable-from-vector-setup)
 - [Contributing](#contributing)
 
-## Installation
+## Installation and Overview
 
 You can install the package using pip directly from GitHub:
 
 ```bash
 pip install git+https://github.com/MESH-Model/MESH-Scripts-PyLib.git
 ```
-
-## Overview
 
 This library provides several utilities that streamline data preprocessing for hydrological models like MESH. The key functionalities include:
 
@@ -36,7 +36,7 @@ This library provides several utilities that streamline data preprocessing for h
 
 `gen_streamflow_file.py` contains a class `GenStreamflowFile` that handles fetching and combining streamflow data from USGS and Environment Canada and generating output in the OBSTXT and ENSIM formats.
 
-Example Usage  (Please check MESH_streamflowFile_example.ipynb for step by step example) \
+Example Usage  (Please check MESH_streamflowFile_example.ipynb for step by step example) 
 ```python
 from MESHpyPreProcessing.gen_streamflow_file import GenStreamflowFile
 #Initialize the class
@@ -50,7 +50,7 @@ end_date = "2018-01-10"
 # Fetch hydrometric data
 combined_data_ca, station_info_ca = gen_flow.fetch_hydrometric_data_ca(station_ca, start_date, end_date)
 combined_data_us, station_info_us = gen_flow.extract_flow_data_us(station_us, start_date, end_date)
-# Combine the data\
+# Combine the data
 combined_data = pd.merge(combined_data_ca, combined_data_us, on='Date', how='outer')
 # Write to files in OBSTXT and ENSIM formats
 gen_flow.write_flow_data_to_file_obstxt('MESH_input_streamflow.txt', combined_data, station_info_ca + station_info_us)
@@ -70,7 +70,7 @@ Functions:
 Example Usage\
 `from MESHpyPreProcessing.gsde_soil import GSDESoil`
 - Initialize the GSDESoil class\
-`soil_processor = GSDESoil(directory='path/to/data', input_basin='path/to/shapefile.shp', output_shapefile='path/to/output.shp')`\
+`soil_processor = GSDESoil(directory='path/to/data', input_basin='path/to/shapefile.shp', output_shapefile='path/to/output.shp')`
 - Load and merge soil data\
 `file_names = ['file1.csv', 'file2.csv']`\
 `soil_processor.load_data(file_names)`
