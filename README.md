@@ -4,7 +4,7 @@ A Python library for preprocessing hydrometric and soil data, performing spatial
 
 ## Table of Contents
 ### Installation and Overview
-- [Installation and Overview](#installation and overview)
+- [Installation and Overview](#installation)
 ### PreProcessing
 - [Streamflow File Preparation (`gen_streamflow_file.py`)](#streamflow-file-preparation)
 - [Soil Data Processing (`gsde_soil.py`)](#soil-data-processing)
