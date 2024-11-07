@@ -29,9 +29,11 @@ class GenStreamflowFile:
             start_time_station = time.time()
             url = f"https://waterservices.usgs.gov/nwis/dv/?format=json&sites={station}&startDT={start_date}&endDT={end_date}&parameterCd=00060&statCd=00003"
             response = requests.get(url)
+            
             if response.status_code == 200:
                 data = response.json()
-                if 'timeSeries' in data['value']:
+                # Check if 'timeSeries' is not empty
+                if 'value' in data and 'timeSeries' in data['value'] and data['value']['timeSeries']:
                     time_series = data['value']['timeSeries'][0]
                     variable_info = time_series['variable']
                     unit = variable_info.get('unit', {}).get('unitCode', None)
@@ -148,7 +150,9 @@ class GenStreamflowFile:
                         data_dict[station_number][date_index] = flow
 
                 first_feature = full_data[0]['properties']
+                #print("Properties:", first_feature)
                 geometry = full_data[0]['geometry']
+                #print("Geometry:", geometry)
                 station_info.append({
                     'Station_Number': first_feature['STATION_NUMBER'],
                     'Station_Name': first_feature['STATION_NAME'],
@@ -360,5 +364,3 @@ class GenStreamflowFile:
                 flows = row[1:].values  # Exclude date
                 flow_string = " ".join(f"{flow:>{column_width}.4f}" for flow in flows)  # Right-aligned values
                 file_conn.write(f"{' ' * initial_spacing}{flow_string}\n")
-
-                       
