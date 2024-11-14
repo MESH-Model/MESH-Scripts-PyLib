@@ -157,7 +157,7 @@ This function iterates through sub-basins, merging those below the minimum sub-a
 
 ### Example usage
 ```python
-from MESHpyPreProcessing.merit_basin_aggregation import merit_basin_aggregation
+from MESHpyPreProcessing.Aggregation_vector import merit_basin_aggregation
 import geopandas as gpd
 import os
 
