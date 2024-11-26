@@ -238,7 +238,7 @@ class GenStreamflowFile:
             ":Projection         LATLONG",
             ":Ellipsoid          WGS84",
             "#",
-            f":StartTime          {flow_data['Date'].iloc[0]} 00:00:00.00000",
+            f":StartTime          {flow_data['Date'].iloc[0].strftime('%Y/%m/%d')} 00:00:00.00000",
             "#",
             ":AttributeUnits            1.0000000",
             ":DeltaT               24",
