@@ -202,7 +202,7 @@ class GenStreamflowFile:
                     if drainage_area is None:
                         drainage_area = -1.0
                     station_name = station_info['Station_Name']
-                    file_conn.write(f"{int(lat * 60):4d} {int(lon * 60):4d} {lat:12.6f} {lon:12.6f} {station_id:12s} {float(drainage_area):12.3f} {station_name}\n")
+                    file_conn.write(f"{int(lat * 60):4d} {int(lon * 60):4d} {station_id:12s} {lat:12.6f} {lon:12.6f} {float(drainage_area):12.3f} {station_name}\n")
             
             for i in range(num_days):
                 flow_values = flow_data.iloc[i, 1:].values
