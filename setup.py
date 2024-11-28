@@ -11,6 +11,7 @@ setup(
         'netCDF4',
         'requests',
         'xarray',
+        'shapely',
         'owslib'
     ],
     description='Python package for processing and analyzing hydrological data.',
