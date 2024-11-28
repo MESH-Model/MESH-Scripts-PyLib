@@ -224,7 +224,7 @@ Functions:
 ### Example usage
 Convert DDB NetCDF to CSV
 ```python
-from netcdf_converter import convert_netcdf
+from MESHpyPreProcessing.convert_ddbnetcdf import convert_netcdf
 netcdf_file = "path/to/input_file.nc"
 output_csv = "path/to/output_file.csv"
 # Convert NetCDF to CSV
@@ -232,7 +232,7 @@ convert_netcdf(netcdf_file, output_csv, conversion_type="csv")
 ```
 Convert NetCDF to Point Shapefile
 ```python
-from netcdf_converter import convert_netcdf
+from MESHpyPreProcessing.convert_ddbnetcdf import convert_netcdf
 netcdf_file = "path/to/input_file.nc"
 output_shapefile = "path/to/output_file.shp"
 # Convert NetCDF to point shapefile
