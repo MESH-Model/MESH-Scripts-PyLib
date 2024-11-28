@@ -11,6 +11,7 @@ A Python library for preprocessing hydrometric and soil data, performing spatial
 - [Spatial Analysis (`gdf_edit.py`)](#spatial-analysis)
 - [Basin and River Network Aggregation (`merit_basin_aggregation`)](#basin-and-river-network-aggregation)
 - [NetCDF File Generation (`NetCDFWriter.py`)](#netcdf-file-generation)
+- [DDB conversion to csv or shapefile (`convert_ddbnetcdf.py`)](#convert-ddb-netcdf-to-csv-shapefile)
 ### PostProcessing
 - [Plot Variable from Vector setup (`plt_var_vector_setup.py`)](#plot-variable-from-vector-setup)
 - [Contributing](#contributing)
@@ -213,7 +214,30 @@ Functions:
 - `set_coordinates`: Extracts longitude and latitude from the NetCDF drainage database.
 - `set_num_soil_layers`: Sets the number of soil layers for the NetCDF file.
 - `write_netcdf`: Writes processed data to a NetCDF file.
-
+  
+## Convert ddb netcdf to csv shapefile
+`NetCDF Converter` is a for converting ddb NetCDF files to either CSV files or point shapefiles. It supports processing geospatial and tabular data.
+### Features
+- Convert NetCDF data to a CSV file where each variable becomes a column.
+- Convert NetCDF data to a point shapefile with `lat` and `lon` coordinates.
+- Automatically handles missing values and multi-dimensional variables.
+### Example usage
+Convert DDB NetCDF to CSV
+```python
+from netcdf_converter import convert_netcdf
+netcdf_file = "path/to/input_file.nc"
+output_csv = "path/to/output_file.csv"
+# Convert NetCDF to CSV
+convert_netcdf(netcdf_file, output_csv, conversion_type="csv")
+```
+Convert NetCDF to Point Shapefile
+```python
+from netcdf_converter import convert_netcdf
+netcdf_file = "path/to/input_file.nc"
+output_shapefile = "path/to/output_file.shp"
+# Convert NetCDF to point shapefile
+convert_netcdf(netcdf_file, output_shapefile, conversion_type="shapefile")
+```
 ## Plot Variable from Vector setup
 `plt_var_from_vector_ddb_netcdf`, designed to plot spatial data from a vector drainage database in NetCDF format. 
 The function generates a map showing specific variables within a watershed basin or across various land use classes, 
