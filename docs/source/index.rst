@@ -12,13 +12,17 @@ The package includes utilities for streamflow file preparation, soil data proces
 Note
 ----
 
-   **This project is still under Active Development**
+   **Project development is in progress**
 
 .. toctree::
    :maxdepth: 1
    :caption: Contents:
    
    gen_streamflow_file
+   Aggregation_vector
+   NetCDFWriter
+   gsde_soil
+   convert_ddbnetcdf
    
  
 
