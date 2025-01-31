@@ -11,6 +11,26 @@ MESH-Scripts-PyLib IO Documentation
 .. note::
    This project is under active development.
 
+Installation
+------------
+
+You can install the package using pip directly from GitHub:
+
+.. code-block:: bash
+
+   pip install git+https://github.com/MESH-Model/MESH-Scripts-PyLib.git
+
+Overview
+--------
+
+This library provides several utilities that streamline data preprocessing for hydrological models like MESH. The key functionalities include:
+
+- **Streamflow Data Processing:** Extraction and processing of streamflow data from Canadian and US hydrometric sources.
+- **Soil Data Handling:** Loading, merging, and cleaning soil data from CSV files.
+- **Spatial Analysis:** Flagging non-contributing areas using GeoDataFrames.
+- **Basin & River Aggregation:** Aggregation of basin and river networks with custom thresholds.
+- **NetCDF Generation:** Writing processed soil data to NetCDF format for hydrological modeling.
+
 Contents
 --------
 
@@ -30,7 +50,3 @@ Indices and Tables
 - :ref:`genindex`
 - :ref:`modindex`
 - :ref:`search`
-
-
-
-   
