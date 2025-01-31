@@ -18,6 +18,8 @@ Note
    :maxdepth: 1
    :caption: Contents:
    
+   gen_streamflow_file
+   
  
 
 Indices and tables
