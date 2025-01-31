@@ -1,4 +1,7 @@
 Netcdf writer
 ======
 
-.. automodapi:: MESHpyPreProcessing.NetCDFWriter
+.. automodule:: MESHpyPreProcessing.NetCDFWriter
+   :members:
+   :undoc-members:
+   :inherited-members:
