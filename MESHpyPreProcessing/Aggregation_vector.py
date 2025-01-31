@@ -1,3 +1,51 @@
+"""
+Basin and River Network Aggregation
+===================================
+
+The `merit_basin_aggregation` function aggregates basin and river network shapefiles.
+This function uses parameters like minimum sub-area, slope, and river length to iteratively
+aggregate small sub-basins.
+
+Parameters:
+------------
+- `input_basin`: Basin GeoDataFrame with COMID identifiers.
+- `input_river`: River network GeoDataFrame with slope and length attributes.
+- `min_subarea`: Minimum area for sub-basins.
+- `min_slope`: Minimum allowable river slope.
+- `min_length`: Minimum river length.
+
+This function iterates through sub-basins, merging those below the minimum sub-area
+threshold until no further aggregation is possible. It also computes and adjusts slopes,
+river lengths, and weighted slopes for simplified river networks.
+
+Example usage:
+--------------
+```python
+from MESHpyPreProcessing.Aggregation_vector import merit_basin_aggregation
+import geopandas as gpd
+import os
+
+# Define paths and parameters
+input_basin_path = "/home/fuaday/github-repos/Souris_Assiniboine_MAF/1-geofabric/SrsAboine-geofabric/sras_subbasins_MAF_noAgg.shp"
+input_river_path = "/home/fuaday/github-repos/Souris_Assiniboine_MAF/1-geofabric/SrsAboine-geofabric/sras_rivers_MAF_noAgg.shp"
+min_subarea = 50
+min_slope = 0.0000001
+min_length = 1.0
+output_basin_path = "/home/fuaday/github-repos/Souris_Assiniboine_MAF/1-geofabric/sras_subbasins_MAF_Agg.shp"
+output_river_path = "/home/fuaday/github-repos/Souris_Assiniboine_MAF/1-geofabric/sras_rivers_MAF_Agg.shp"
+
+# Load input data
+input_basin = gpd.read_file(input_basin_path)
+input_river = gpd.read_file(input_river_path)
+
+# Perform aggregation
+agg_basin, agg_river = merit_basin_aggregation(input_basin, input_river, min_subarea, min_slope, min_length)
+
+# Save aggregated data
+agg_basin.to_file(output_basin_path)
+agg_river.to_file(output_river_path)
+```
+"""
 import pandas as pd
 import geopandas as gpd
 import numpy as np
