@@ -23,5 +23,6 @@ python:
       - setup.py
   - requirements: docs/requirements.txt
 
-apt_packages:
-  - graphviz
+build:
+  apt_packages:
+    - graphviz
