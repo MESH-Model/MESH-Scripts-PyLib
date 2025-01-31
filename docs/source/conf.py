@@ -47,7 +47,7 @@ pygments_style = 'sphinx'
 html_context = {
   'display_github': True,
   'github_user': 'fuadyassin',
-  'github_repo': 'MESH-Scripts-PyLi',
+  'github_repo': 'MESH-Scripts-PyLib',
   'github_version': 'main/docs/source/'
 }
 
