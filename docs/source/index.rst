@@ -19,13 +19,7 @@ Note
    :maxdepth: 1
    :caption: Contents:
    
-   QuickStart
-   Preprocessing
-   Data
-   Metrics
-   Visualization
-   Analysis
-   Contribute
+ 
 
 Indices and tables
 ==================
