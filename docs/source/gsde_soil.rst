@@ -1,5 +1,7 @@
 GSDE soil
 ======
 
-.. automodapi:: MESHpyPreProcessing.gsde_soil
-   :no-inheritance-diagram:
+.. automodule:: MESHpyPreProcessing.gsde_soil
+   :members:
+   :undoc-members:
+   :inherited-members:
