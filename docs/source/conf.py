@@ -31,6 +31,8 @@ extensions = [
     'sphinx.ext.napoleon',  # google and numpy doc string support
     'sphinx.ext.mathjax',  # latex rendering of equations using MathJax
     'nbsphinx',  # for direct embedding of jupyter notebooks into sphinx docs
+    'sphinx.ext.inheritance_diagram',
+    'sphinx.ext.graphviz',
     'nbsphinx_link'
     ]
 numpydoc_show_class_members = False
