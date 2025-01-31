@@ -31,6 +31,7 @@ docutils==0.19
     #   sphinx-rtd-theme
 fastjsonschema==2.20.0
     # via nbformat
+graphviz
 idna==3.7
     # via requests
 imagesize==1.4.1
