@@ -138,6 +138,7 @@ sphinxcontrib-qthelp==1.0.7
     # via sphinx
 sphinxcontrib-serializinghtml==1.1.10
     # via sphinx
+sphinx.ext.graphviz
 tinycss2==1.3.0
     # via nbconvert
 tornado==6.4.1
