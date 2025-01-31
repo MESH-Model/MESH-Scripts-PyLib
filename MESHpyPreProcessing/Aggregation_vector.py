@@ -20,7 +20,7 @@ river lengths, and weighted slopes for simplified river networks.
 
 Example usage:
 --------------
-```python
+
 from MESHpyPreProcessing.Aggregation_vector import merit_basin_aggregation
 import geopandas as gpd
 import os
@@ -44,7 +44,6 @@ agg_basin, agg_river = merit_basin_aggregation(input_basin, input_river, min_sub
 # Save aggregated data
 agg_basin.to_file(output_basin_path)
 agg_river.to_file(output_river_path)
-```
 """
 import pandas as pd
 import geopandas as gpd
