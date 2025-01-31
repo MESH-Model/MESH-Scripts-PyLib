@@ -28,6 +28,7 @@ extensions = [
     'sphinx_automodapi.smart_resolver',
     'sphinx_rtd_theme',
     'sphinx.ext.autodoc',  # autodocument
+    'sphinx.ext.viewcode',
     'sphinx.ext.napoleon',  # google and numpy doc string support
     'sphinx.ext.mathjax',  # latex rendering of equations using MathJax
     'nbsphinx',  # for direct embedding of jupyter notebooks into sphinx docs
@@ -52,6 +53,9 @@ html_context = {
   'github_repo': 'MESH-Scripts-PyLib',
   'github_version': 'main/docs/source/'
 }
+# Options for inheritance diagrams
+inheritance_graph_attrs = dict(rankdir="LR", size='"6.0, 8.0"', fontsize=12)
+inheritance_node_attrs = dict(shape="ellipse", fontsize=12, color="blue", style="filled", fillcolor="lightgray")
 
 # -- Napoleon autodoc options -------------------------------------------------
 napoleon_numpy_docstring = True
