@@ -36,16 +36,16 @@ Contents
 
 .. toctree::
    :maxdepth: 2
-   :caption: Modules
+   :caption: Contents:
 
-   gen_streamflow_file
-   plt_var_vector_setup
    Aggregation_vector
    NetCDFWriter
-   gsde_soil
    convert_ddbnetcdf
    gdf_edit
-   
+   gen_streamflow_file
+   gsde_soil
+   remap_climate_to_ddb
+   plt_var_vector_setup
 
 
 Indices and Tables
