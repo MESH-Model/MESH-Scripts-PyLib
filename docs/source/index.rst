@@ -43,6 +43,7 @@ Contents
    NetCDFWriter
    gsde_soil
    convert_ddbnetcdf
+   gdf_edit
 
 Indices and Tables
 ------------------
