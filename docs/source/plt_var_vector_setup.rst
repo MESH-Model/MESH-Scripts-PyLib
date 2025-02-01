@@ -1,4 +1,4 @@
-MESHpyPostProcessing.plt_var_vector_setup
+plt_var_vector_setup
 ==========================================
 
 .. automodule:: plt_var_vector_setup
