@@ -1,4 +1,4 @@
-MESHpyPreProcessing.gen_streamflow_file
+gen_streamflow_file
 ========================================
 
 .. automodule:: MESHpyPreProcessing.gen_streamflow_file
