@@ -12,8 +12,8 @@ import datetime
 
 sys.path.insert(0, os.path.abspath('.'))
 sys.path.insert(0, os.path.abspath('../../'))
-sys.path.insert(0, os.path.abspath('../../../MESHpyPreProcessing'))
-sys.path.insert(0, os.path.abspath('../../../MESHpyPostProcessing'))
+sys.path.insert(0, os.path.abspath('../../MESHpyPreProcessing/'))
+sys.path.insert(0, os.path.abspath('../../MESHpyPostProcessing/'))
 
 
 # -- Project information -----------------------------------------------------
