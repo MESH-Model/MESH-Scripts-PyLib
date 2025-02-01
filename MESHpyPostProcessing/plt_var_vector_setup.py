@@ -1,3 +1,65 @@
+"""
+Variable Visualization from Vector and NetCDF Data
+==================================================
+
+This module provides a function to visualize spatial variables from a NetCDF file and overlay them on a shapefile.
+It supports single-variable plots, land use-based grouped visualizations, and soil layer-specific representations.
+
+Example Usage
+-------------
+>>> from plt_var_vector_setup import plt_var_from_vector_ddb_netcdf
+>>> plt_var_from_vector_ddb_netcdf(
+...     output_basin_path='basin.shp',
+...     ddbnetcdf_path='data.nc',
+...     variable_name='SoilMoisture',
+...     save_path='output_plot.png'
+... )
+
+>>> plt_var_from_vector_ddb_netcdf(
+...     output_basin_path='basin.shp',
+...     ddbnetcdf_path='data.nc',
+...     variable_name='LandCover',
+...     landuse_classes=['Forest', 'Grassland', 'Urban'],
+...     save_path='landcover_plot.png'
+... )
+
+Function Details
+----------------
+- plt_var_from_vector_ddb_netcdf: Plots a variable from a NetCDF file onto a spatial representation of a watershed.
+
+Parameters
+----------
+- output_basin_path : str
+    Path to the input basin shapefile.
+- ddbnetcdf_path : str
+    Path to the NetCDF file containing spatial data.
+- variable_name : str
+    Name of the variable to be visualized from the NetCDF file.
+- save_path : str, optional (default='plot.png')
+    Path where the output plot should be saved.
+- text_location : tuple, optional (default=(0.55, 0.95))
+    Location for the text annotation in percentage form.
+- font_size : int, optional (default=10)
+    Font size for labels and titles.
+- cmap : str, optional (default='viridis')
+    Colormap to be used for plotting the data.
+- cbar_location : list, optional (default=[0.96, 0.15, 0.02, 0.7])
+    Positioning of the color bar.
+- subplot_adjustments : dict, optional
+    Custom subplot adjustments if needed.
+- subbasin_var : str, optional (default='subbasin')
+    NetCDF variable corresponding to subbasin identifiers.
+- comid_var : str, optional (default='COMID')
+    Column name in the shapefile corresponding to subbasin identifiers.
+- landuse_classes : list, optional
+    List of land use classifications if applicable.
+- grudim : str, optional (default='NGRU')
+    NetCDF dimension representing different land use groups.
+- grunames_var : str, optional (default='LandUse')
+    NetCDF variable containing land use group names.
+- soldim : str, optional (default='nsol')
+    NetCDF dimension representing different soil layers.
+"""
 import geopandas as gpd
 import pandas as pd
 import matplotlib.pyplot as plt
