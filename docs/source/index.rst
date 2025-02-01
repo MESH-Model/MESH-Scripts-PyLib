@@ -44,6 +44,7 @@ Contents
    gsde_soil
    convert_ddbnetcdf
    gdf_edit
+   plt_var_vector_setup
 
 Indices and Tables
 ------------------
