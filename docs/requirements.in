@@ -6,3 +6,4 @@ nbsphinx_link
 shapely
 geopandas
 shapely
+graphviz

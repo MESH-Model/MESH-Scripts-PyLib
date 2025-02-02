@@ -1,7 +1,7 @@
-GSDE soil
+gdf_edit
 ======
 
-.. automodule:: MESHpyPreProcessing.gsde_soil
+.. automodule:: MESHpyPreProcessing.gdf_edit
    :members:
    :undoc-members:
    :inherited-members:

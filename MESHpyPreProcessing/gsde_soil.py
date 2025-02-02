@@ -1,3 +1,36 @@
+"""
+GSDE Soil Data Processor
+========================
+
+This script contains a class `GSDESoil` that processes soil property data from multiple CSV files,
+merges the data with a given shapefile, and exports the processed data.
+
+Example Usage:
+--------------
+>>> from gsde_soil import GSDESoil
+>>> gsde_processor = GSDESoil(directory='data/', input_basin='basin.shp', output_shapefile='output.shp')
+>>> gsde_processor.load_data(file_names=['soil1.csv', 'soil2.csv'], search_replace_dict=None, suffix_dict=None)
+>>> gsde_processor.fill_and_clean_data()
+>>> gsde_processor.calculate_weights(gsde_intervals=[(0,10), (10,20)], mesh_intervals=[(0,5), (5,15)])
+>>> gsde_processor.calculate_mesh_values(column_names={'OC': ['OC1', 'OC2'], 'Sand': ['Sand1', 'Sand2']})
+>>> gsde_processor.merge_and_save_shapefile()
+
+Classes & Functions:
+--------------------
+- GSDESoil: Class that manages soil data loading, processing, and merging.
+  - load_data: Loads soil data from CSV files.
+  - fill_and_clean_data: Cleans and fills missing values in soil data.
+  - calculate_weights: Computes weighted values for soil layers.
+  - calculate_mesh_values: Computes interpolated soil properties.
+  - merge_and_save_shapefile: Merges processed soil data with a shapefile.
+  - set_coordinates: Extracts longitude and latitude values from a NetCDF file.
+
+Parameters:
+-----------
+- directory (str): Directory containing input CSV files.
+- input_basin (str): Path to the input basin shapefile.
+- output_shapefile (str): Path to the output merged shapefile.
+"""
 import os
 import numpy as np
 import pandas as pd
@@ -6,6 +39,24 @@ from functools import reduce
 import xarray as xr
 
 class GSDESoil:
+    """
+    A class to process and merge soil data from CSV files with a given basin shapefile.
+
+    Attributes:
+    -----------
+    directory : str
+        Directory containing soil CSV files.
+    input_basin : str
+        Path to the input basin shapefile.
+    output_shapefile : str
+        Path to the output shapefile with merged data.
+    file_paths : list
+        List of file paths to soil CSV files.
+    gsde_df : pandas.DataFrame
+        DataFrame storing soil property data.
+    merged_gdf : geopandas.GeoDataFrame
+        Merged GeoDataFrame containing the final processed data.
+    """
     def __init__(self, directory, input_basin, output_shapefile):
         self.directory = directory
         self.input_basin = input_basin

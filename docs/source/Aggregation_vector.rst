@@ -1,4 +1,7 @@
 Aggregate vector subbasins
 ======
 
-.. automodapi:: MESHpyPreProcessing.Aggregation_vector
+.. automodule:: MESHpyPreProcessing.Aggregation_vector
+   :members:
+   :undoc-members:
+   :inherited-members:

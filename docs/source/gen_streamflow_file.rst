@@ -1,4 +1,7 @@
-Generate Steamflow File
-======
+gen_streamflow_file
+========================================
 
-.. automodapi:: MESHpyPreProcessing.gen_streamflow_file
+.. automodule:: MESHpyPreProcessing.gen_streamflow_file
+   :members:
+   :undoc-members:
+   :inherited-members:

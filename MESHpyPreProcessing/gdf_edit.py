@@ -1,3 +1,49 @@
+"""
+gdf_edit.py
+===========
+
+This module provides functions to flag non-contributing areas (NCAs) or lakes and reservoirs in GeoDataFrames
+based on intersection thresholds, with customizable options for column names, default values, and initialization values.
+
+Example Usage
+-------------
+1. Using Shapefiles:
+>>> from MESHpyPreProcessing.gdf_edit import flag_ncaalg_from_files
+>>> flagged_gdf = flag_ncaalg_from_files(
+...     'path/to/shapefile1.shp', 
+...     'path/to/shapefile2.shp', 
+...     threshold=0.1, 
+...     output_path='output.shp'
+... )
+
+>>> flagged_gdf = flag_ncaalg_from_files(
+...     'path/to/shapefile1.shp', 
+...     'path/to/shapefile2.shp', 
+...     threshold=0.1, 
+...     output_path='output.shp', 
+...     ncontr_col="custom_flag_column",   # Custom column in gdf1 to store flags
+...     value_column="NON_ID",             # Column in gdf2 with values to assign
+...     initial_value=0,                   # Initial value for gdf1's flag column
+...     default_value=5                    # Default value if no value_column specified
+... )
+
+2. Using GeoDataFrames Directly:
+>>> from MESHpyPreProcessing.gdf_edit import flag_ncaalg
+>>> import geopandas as gpd
+>>> gdf1 = gpd.read_file('path/to/shapefile1.shp')
+>>> gdf2 = gpd.read_file('path/to/shapefile2.shp')
+>>> flagged_gdf = flag_ncaalg(gdf1, gdf2, threshold=0.1)
+
+>>> flagged_gdf = flag_ncaalg(
+...     gdf1, 
+...     gdf2, 
+...     threshold=0.1, 
+...     ncontr_col="custom_flag_column",   # Custom column in gdf1 to store flags
+...     value_column="NON_ID",             # Column in gdf2 with values to assign
+...     initial_value=0,                   # Initial value for gdf1's flag column
+...     default_value=5                    # Default value if no value_column specified
+... )
+"""
 import geopandas as gpd
 import pandas as pd
 

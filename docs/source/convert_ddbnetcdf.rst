@@ -1,4 +1,7 @@
 convert_ddbnetcdf
 ======
 
-.. automodapi:: MESHpyPreProcessing.convert_ddbnetcdf
+.. automodule:: MESHpyPreProcessing.convert_ddbnetcdf
+   :members:
+   :undoc-members:
+   :inherited-members:

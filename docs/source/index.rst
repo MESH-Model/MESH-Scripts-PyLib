@@ -1,35 +1,56 @@
-.. NHS_postprocessing documentation master file, created by
-   sphinx-quickstart on Thu Jul 18 14:03:07 2024.
-   You can adapt this file completely to your liking, but it should at least
-   contain the root `toctree` directive.
+MESH-Scripts-PyLib IO Documentation
+=====================================
 
-MESH-Scripts-PyLib IO documentation!
-===================================
+**MESH-Scripts-PyLib** is a Python library for preprocessing hydrometric and soil data, performing spatial analysis, and generating NetCDF files for use in hydrological modeling. The package includes utilities for:
 
-A Python library for preprocessing hydrometric and soil data, performing spatial analysis, and generating NetCDF files for use in hydrological modeling. 
-The package includes utilities for streamflow file preparation, soil data processing, spatial analysis, and NetCDF file generation.
+- Streamflow file preparation
+- Soil data processing
+- Spatial analysis
+- NetCDF file generation
 
-Note
-----
+.. note::
+   This project is under active development.
 
-   **Project development is in progress**
+Installation
+------------
+
+You can install the package using pip directly from GitHub:
+
+.. code-block:: bash
+
+   pip install git+https://github.com/MESH-Model/MESH-Scripts-PyLib.git
+
+Overview
+--------
+
+This library provides several utilities that streamline data preprocessing for hydrological models like MESH. The key functionalities include:
+
+- **Streamflow Data Processing:** Extraction and processing of streamflow data from Canadian and US hydrometric sources.
+- **Soil Data Handling:** Loading, merging, and cleaning soil data from CSV files.
+- **Spatial Analysis:** Flagging non-contributing areas using GeoDataFrames.
+- **Basin & River Aggregation:** Aggregation of basin and river networks with custom thresholds.
+- **NetCDF Generation:** Writing processed soil data to NetCDF format for hydrological modeling.
+
+Contents
+--------
 
 .. toctree::
-   :maxdepth: 1
+   :maxdepth: 2
    :caption: Contents:
-   
-   gen_streamflow_file
+
    Aggregation_vector
    NetCDFWriter
-   gsde_soil
    convert_ddbnetcdf
-   
- 
-
-Indices and tables
-==================
-
-* :ref:`genindex`
+   gdf_edit
+   gen_streamflow_file
+   gsde_soil
+   remap_climate_to_ddb
+   plt_var_vector_setup
 
 
-   
+Indices and Tables
+------------------
+
+- :ref:`genindex`
+- :ref:`modindex`
+- :ref:`search`

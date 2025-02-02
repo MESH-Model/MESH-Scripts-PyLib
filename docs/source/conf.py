@@ -12,6 +12,9 @@ import datetime
 
 sys.path.insert(0, os.path.abspath('.'))
 sys.path.insert(0, os.path.abspath('../../'))
+# sys.path.insert(0, os.path.abspath('../../MESHpyPreProcessing/'))
+# sys.path.insert(0, os.path.abspath('../../MESHpyPostProcessing/'))
+# print("Python sys.path:", sys.path)
 
 # -- Project information -----------------------------------------------------
 
@@ -28,9 +31,12 @@ extensions = [
     'sphinx_automodapi.smart_resolver',
     'sphinx_rtd_theme',
     'sphinx.ext.autodoc',  # autodocument
+    'sphinx.ext.viewcode',
     'sphinx.ext.napoleon',  # google and numpy doc string support
     'sphinx.ext.mathjax',  # latex rendering of equations using MathJax
     'nbsphinx',  # for direct embedding of jupyter notebooks into sphinx docs
+    'sphinx.ext.inheritance_diagram',
+    'sphinx.ext.graphviz',
     'nbsphinx_link'
     ]
 numpydoc_show_class_members = False
@@ -50,6 +56,9 @@ html_context = {
   'github_repo': 'MESH-Scripts-PyLib',
   'github_version': 'main/docs/source/'
 }
+# Options for inheritance diagrams
+inheritance_graph_attrs = dict(rankdir="LR", size='"6.0, 8.0"', fontsize=12)
+inheritance_node_attrs = dict(shape="ellipse", fontsize=12, color="blue", style="filled", fillcolor="lightgray")
 
 # -- Napoleon autodoc options -------------------------------------------------
 napoleon_numpy_docstring = True

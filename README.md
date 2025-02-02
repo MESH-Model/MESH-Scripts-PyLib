@@ -2,6 +2,8 @@
 
 A Python library for preprocessing hydrometric and soil data, performing spatial analysis, and generating NetCDF files for use in hydrological modeling. The package includes utilities for streamflow file preparation, soil data processing, spatial analysis, and NetCDF file generation.
 
+- **Documentation:** [https://mesh-scripts-pylib.readthedocs.io/en/latest/index.html]
+
 ## Table of Contents
 ### Installation and Overview
 - [Installation and Overview](#installation-and-overview)
