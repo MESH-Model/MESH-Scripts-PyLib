@@ -1,3 +1,10 @@
+import geopandas as gpd
+import pandas as pd
+import matplotlib.pyplot as plt
+import netCDF4 as nc
+import matplotlib.colors as mcolors
+import math
+import numpy as np
 """
 Variable Visualization from Vector and NetCDF Data
 ==================================================
@@ -60,15 +67,6 @@ Parameters
 - soldim : str, optional (default='nsol')
     NetCDF dimension representing different soil layers.
 """
-
-import geopandas as gpd
-import pandas as pd
-import matplotlib.pyplot as plt
-import netCDF4 as nc
-import matplotlib.colors as mcolors
-import math
-import numpy as np
-
 def plt_var_from_vector_ddb_netcdf(
     output_basin_path, 
     ddbnetcdf_path, 
