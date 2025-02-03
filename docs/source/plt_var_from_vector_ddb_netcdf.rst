@@ -1,4 +1,4 @@
-plt_var_vector_setup
+plt_var_from_vector_ddb_netcdf
 ======
 
 .. automodule:: MESHpyPreProcessing.plt_var_from_vector_ddb_netcdf
