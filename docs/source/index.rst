@@ -46,7 +46,7 @@ Contents
    gsde_soil
    remap_climate_to_ddb
    generate_mesh_class_ini_from_excel
-   plt_var_vector_setup
+   plt_var_from_vector_ddb_netcdf
 
 
 Indices and Tables
