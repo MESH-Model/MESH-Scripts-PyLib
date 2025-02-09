@@ -39,6 +39,9 @@ extensions = [
     'sphinx.ext.graphviz',
     'nbsphinx_link'
     ]
+
+# Skip execution of Jupyter notebooks
+nbsphinx_execute = 'never'
 numpydoc_show_class_members = False
 
 templates_path = ['_templates']
