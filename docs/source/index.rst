@@ -48,6 +48,14 @@ Contents
    generate_mesh_hydrology_ini_from_excel
    plt_var_from_vector_ddb_netcdf
 
+Jupyter Notebooks
+-----------------
+
+.. toctree::
+   :maxdepth: 2
+   :caption: Jupyter Notebooks:
+
+   MESH_StreamflowFilePrep
 
 Indices and Tables
 ------------------
