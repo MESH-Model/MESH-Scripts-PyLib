@@ -22,13 +22,11 @@ def generate_mesh_class_ini_from_excel(excel_file, output_file, selected_land_co
     Only active land covers are included, as indicated by the 'status' row in the Excel sheet. 
     
     Processing Steps:
-    1. Load the Excel file and normalize column names.
-    2. Identify active land covers (status > 0).
-    3. Verify required rows such as 'colum'.
-    
-    4. Extract vegetation and land cover parameters.
-    
-    5. Write formatted values into an `.ini` file with the required MESH structure.
+        1. Load the Excel file and normalize column names.
+        2. Identify active land covers (status > 0).
+        3. Verify required rows such as 'colum'.
+        4. Extract vegetation and land cover parameters.
+        5. Write formatted values into an `.ini` file with the required MESH structure.
     
     Output Format:
     ------------
