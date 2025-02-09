@@ -44,10 +44,18 @@ Contents
    gdf_edit
    gen_streamflow_file
    gsde_soil
-   remap_climate_to_ddb
    generate_mesh_class_ini_from_excel
+   generate_mesh_hydrology_ini_from_excel
    plt_var_from_vector_ddb_netcdf
 
+Jupyter Notebooks
+-----------------
+
+.. toctree::
+   :maxdepth: 2
+   :caption: Jupyter Notebooks:
+
+   MESH_StreamflowFilePrep
 
 Indices and Tables
 ------------------
