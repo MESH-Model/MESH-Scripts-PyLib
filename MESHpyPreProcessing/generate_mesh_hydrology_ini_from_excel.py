@@ -70,13 +70,11 @@ def generate_mesh_hydrology_ini_from_excel(excel_file, sheet_name, output_file):
     ---------------------------------------------------------------------------------
     Example Usage:
     ---------------------------------------------------------------------------------
-    ```
-    excel_file = "/content/drive/MyDrive/ColabNotebook_FY/meshparametersvalues2.xlsx"
-    sheet_name = "hydrology_ini"
-    output_file = "MeshHydrology.ini"
-
-    create_mesh_hydrology_ini(excel_file, sheet_name, output_file)
-    ```
+    >>> excel_file = "/content/drive/MyDrive/ColabNotebook_FY/meshparametersvalues2.xlsx"
+    >>> sheet_name = "hydrology_ini"
+    >>> output_file = "MeshHydrology.ini"
+    >>> generate_mesh_hydrology_ini_from_excel(excel_file, sheet_name, output_file)
+    
     - This will generate a properly formatted `MeshHydrology.ini` file in the specified path.
     ---------------------------------------------------------------------------------
     """
