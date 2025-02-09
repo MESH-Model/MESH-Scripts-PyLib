@@ -28,7 +28,4 @@ python:
         - setup.py
     - requirements: docs/requirements.txt
 
-# Environment variables (optional, helps debugging)
-environment:
-  READTHEDOCS: "True"
 
