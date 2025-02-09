@@ -47,6 +47,7 @@ def generate_mesh_class_ini_from_excel(excel_file, output_file, selected_land_co
     
     Example Usage:
     --------------
+    pip install git+https://github.com/MESH-Model/MESH-Scripts-PyLib.git
     >>> generate_mesh_ini_from_excel("meshparameters.xlsx", "MESH_output.ini", ["Forest", "crop"],num_cels=7408, lat=53.18, lon=-99.25)
     
     """
