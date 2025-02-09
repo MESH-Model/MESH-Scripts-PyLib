@@ -4,6 +4,8 @@
 #
 #    pip-compile requirements.in
 #
+ipykernel
+jupyter
 alabaster==0.7.16
     # via sphinx
 attrs==23.2.0
