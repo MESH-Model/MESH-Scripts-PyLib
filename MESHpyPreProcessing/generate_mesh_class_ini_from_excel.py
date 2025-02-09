@@ -3,22 +3,38 @@ import pandas as pd
 
 def generate_mesh_class_ini_from_excel(excel_file, output_file, selected_land_covers, num_cels, lat, lon):
     """
-    Generates a MESH parameter file (.ini) using values from an Excel file.
-
-    This function reads parameter values from an Excel sheet and structures them into
-    a MESH-compatible `.ini` file, following the format of vegetation, one-to-one,
-    and multi-value assignments.
-
     Parameters:
     ------------
     excel_file : str
         Path to the Excel file containing parameter values.
     output_file : str
         Path to the output `.ini` file where processed values will be written.
-    selected_land_covers : list of str
-        A list of land cover types to include (case-insensitive). These land covers
-        should match column names in the Excel file.
-
+    num_cels : int
+        Number of grid cells in the model domain.
+    lat : float
+        Latitude of the location.
+    lon : float
+        Longitude of the location.
+    
+    Overview:
+    ------------
+    This function extracts land cover parameter values from an Excel file and writes them into a MESH-compatible `.ini` file. 
+    Only active land covers are included, as indicated by the 'status' row in the Excel sheet. 
+    
+    Processing Steps:
+    1. Load the Excel file and normalize column names.
+    2. Identify active land covers (status > 0).
+    3. Verify required rows such as 'colum'.
+    4. Extract vegetation and land cover parameters.
+    5. Write formatted values into an `.ini` file with the required MESH structure.
+    
+    Output Format:
+    ------------
+    The generated `.ini` file follows MESH parameter conventions with:
+    - Header defining basin information.
+    - Land cover-specific vegetation and hydrological parameters.
+    - Footer containing model time initialization values.
+    
     File Structure:
     ----------------
     The output file consists of:
@@ -28,11 +44,11 @@ def generate_mesh_class_ini_from_excel(excel_file, output_file, selected_land_co
        - One-to-One parameter assignments (written in pairs)
        - Multi-value parameter assignments (written in structured format)
     3. **Final Footer**: Contains three mandatory lines required for MESH processing.
-
+    
     Example Usage:
     --------------
     >>> generate_mesh_ini_from_excel("meshparameters.xlsx", "MESH_output.ini", ["Forest", "crop"],num_cels=7408, lat=53.18, lon=-99.25)
-
+    
     """
     # Load Excel file
     df = pd.read_excel(excel_file, sheet_name='Sheet1')
