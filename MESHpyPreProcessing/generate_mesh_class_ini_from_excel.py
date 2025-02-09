@@ -32,24 +32,19 @@ def generate_mesh_class_ini_from_excel(excel_file, output_file, selected_land_co
     ------------
     
     The generated `.ini` file follows MESH parameter conventions with:
-    
-    - Header defining basin information.
-    
-    - Land cover-specific vegetation and hydrological parameters.
-    
-    - Footer containing model time initialization values.
+        - Header defining basin information.
+        - Land cover-specific vegetation and hydrological parameters.
+        - Footer containing model time initialization values.
     
     File Structure:
     ----------------
     The output file consists of:
-    
-    1. **Header Information**: Includes metadata such as location, author, and details.
-    
-    2. **Land Cover Blocks**: Each selected land cover is written separately, including:
-       - Vegetation parameters (written in pairs)
-       - One-to-One parameter assignments (written in pairs)
-       - Multi-value parameter assignments (written in structured format)
-    3. **Final Footer**: Contains three mandatory lines required for MESH processing.
+        1. **Header Information**: Includes metadata such as location, author, and details.
+        2. **Land Cover Blocks**: Each selected land cover is written separately, including:
+           - Vegetation parameters (written in pairs)
+           - One-to-One parameter assignments (written in pairs)
+           - Multi-value parameter assignments (written in structured format)
+        3. **Final Footer**: Contains three mandatory lines required for MESH processing.
     
     Example Usage:
     --------------
