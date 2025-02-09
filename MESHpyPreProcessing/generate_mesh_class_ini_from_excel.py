@@ -25,20 +25,28 @@ def generate_mesh_class_ini_from_excel(excel_file, output_file, selected_land_co
     1. Load the Excel file and normalize column names.
     2. Identify active land covers (status > 0).
     3. Verify required rows such as 'colum'.
+    
     4. Extract vegetation and land cover parameters.
+    
     5. Write formatted values into an `.ini` file with the required MESH structure.
     
     Output Format:
     ------------
+    
     The generated `.ini` file follows MESH parameter conventions with:
+    
     - Header defining basin information.
+    
     - Land cover-specific vegetation and hydrological parameters.
+    
     - Footer containing model time initialization values.
     
     File Structure:
     ----------------
     The output file consists of:
+    
     1. **Header Information**: Includes metadata such as location, author, and details.
+    
     2. **Land Cover Blocks**: Each selected land cover is written separately, including:
        - Vegetation parameters (written in pairs)
        - One-to-One parameter assignments (written in pairs)
@@ -47,7 +55,7 @@ def generate_mesh_class_ini_from_excel(excel_file, output_file, selected_land_co
     
     Example Usage:
     --------------
-    pip install git+https://github.com/MESH-Model/MESH-Scripts-PyLib.git
+    >>> pip install git+https://github.com/MESH-Model/MESH-Scripts-PyLib.git
     >>> generate_mesh_ini_from_excel("meshparameters.xlsx", "MESH_output.ini", ["Forest", "crop"],num_cels=7408, lat=53.18, lon=-99.25)
     
     """
