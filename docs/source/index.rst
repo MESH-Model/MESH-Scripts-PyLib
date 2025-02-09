@@ -56,7 +56,7 @@ Jupyter Notebooks
    :maxdepth: 2
    :caption: Jupyter Notebooks:
 
-   MESH_StreamflowFilePrep
+   notebooks/MESH_StreamflowFilePrep
 
 Indices and Tables
 ------------------
