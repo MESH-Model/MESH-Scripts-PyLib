@@ -7,6 +7,10 @@ MESH-Scripts-PyLib IO Documentation
 - Soil data processing
 - Spatial analysis
 - NetCDF file generation
+- Vector Aggregation
+- Generate MESH_CLASS.ini file
+- Generate MESH_HYDROLOGY.ini file
+- Plot Variables from Drainage Database and Parameters file
 
 .. note::
    This project is under active development.
