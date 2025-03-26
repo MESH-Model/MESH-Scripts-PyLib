@@ -68,31 +68,80 @@ Functions:
 ## Soil Data Processing
 
 `gsde_soil.py` contains the `GSDESoil` class, which processes soil data from CSV files, merges it with a shapefile, and calculates soil property weights.
+```python
+from MESHpyPreProcessing.gsde_soil import GSDESoil
+from MESHpyPreProcessing.NetCDFWriter import NetCDFWriter
 
-Example Usage\
-`from MESHpyPreProcessing.gsde_soil import GSDESoil`
-- Initialize the GSDESoil class\
-`soil_processor = GSDESoil(directory='path/to/data', input_basin='path/to/shapefile.shp', output_shapefile='path/to/output.shp')`
-- Load and merge soil data\
-`file_names = ['file1.csv', 'file2.csv']`\
-`soil_processor.load_data(file_names)`
-- Fill and clean data\
-`soil_processor.fill_and_clean_data()`
-- Calculate soil property weights and mesh values\
-`gsde_intervals = [(0, 10), (10, 30), (30, 60)]`\
-`mesh_intervals = [(0, 20), (20, 50)]`\
-`soil_processor.calculate_weights(gsde_intervals, mesh_intervals)`\
-`column_names = {'OC': ['OC1', 'OC2'], 'Sand': ['Sand1', 'Sand2']}`\
-`soil_processor.calculate_mesh_values(column_names)`
-- Merge data with shapefile and save the result\
-`soil_processor.merge_and_save_shapefile()`
+# Step 1: Initialize GSDESoil
+gsde = GSDESoil(
+    directory='/path/to/csv_folder',
+    input_basin='/path/to/input_shapefile.shp',
+    output_shapefile='merged_soil_data_output.shp'
+)
+
+# Step 2: Load CSV data with search-replace and optional suffix
+file_names = ['file1.csv', 'file2.csv', ...]
+search_replace_dict = {
+    'file1.csv': (['old_name1', 'old_name2'], ['new_name1', 'new_name2']),
+    ...
+}
+suffix_dict = {'file1.csv': '', 'file2.csv': 'BDRICM'}
+
+gsde.load_data(file_names, search_replace_dict=search_replace_dict, suffix_dict=suffix_dict)
+gsde.fill_and_clean_data()
+
+# Step 3: Define depth intervals and calculate weighted mesh values
+gsde_intervals = [(0, 0.045), (0.045, 0.091), (0.091, 0.166), (0.166, 0.289), (0.289, 0.493), (0.493, 0.829), (0.829, 1.383), (1.383, 2.0)]
+mesh_intervals = [(0, 0.1), (0.1, 0.35), (0.35, 1.2), (1.2, 4.1)]
+column_names = {
+    'CLAY': ['meanCLAY1', 'meanCLAY2', 'meanCLAY3', 'meanCLAY4'],
+    'SAND': ['meanSAND1', 'meanSAND2', 'meanSAND3', 'meanSAND4'],
+    'OC': ['meanOC1', 'meanOC2', 'meanOC3', 'meanOC4']
+}
+
+gsde.calculate_weights(gsde_intervals, mesh_intervals)
+gsde.calculate_mesh_values(column_names)
+gsde.merge_and_save_shapefile()
+# Step 4: Write to NetCDF
+nc_writer = NetCDFWriter(
+    nc_filename='MESH_parameters.nc',
+    shapefile_path='merged_soil_data_output.shp',
+    input_ddb_path='/path/to/MESH_drainage_database.nc'
+)
+
+nc_writer.read_shapefile()
+nc_writer.set_coordinates()
+nc_writer.set_num_soil_layers(num_layers=len(mesh_intervals))
+
+# Define properties and variable metadata
+properties = {
+    'layer_dependent': ['CLAY', 'SAND', 'OC'],
+    'layer_independent': ['ncontr', 'meanBDRICM', 'meanBDTICM', 'xslp', 'dd']
+}
+variable_info = {
+    'CLAY': ('CLAY', 'f4', 'Percentage'),
+    'SAND': ('SAND', 'f4', 'Percentage'),
+    'OC': ('ORGM', 'f4', 'Percentage'),
+    'ncontr': ('IWF', 'i4', '1'),
+    'meanBDRICM': ('BDRICM', 'f4', 'Meters'),
+    'meanBDTICM': ('BDTICM', 'f4', 'Meters'),
+    'xslp': ('xslp', 'f4', 'degree'),
+    'dd': ('dd', 'f4', 'm_per_km2')
+}
+
+nc_writer.write_netcdf(properties=properties, variable_info=variable_info)
+```
 
 Functions:
-- `load_data`: Loads and merges CSV files.
-- `fill_and_clean_data`: Cleans the data by removing invalid values and filling missing ones.
-- `calculate_weights`: Calculates weights for different soil intervals.
-- `calculate_mesh_values`: Applies the weights to calculate mesh values for soil properties.
-- `merge_and_save_shapefile`: Merges the soil data with the shapefile and saves the result.
+
+- `GSDESoil.load_data`: Loads and renames soil CSV data based on user-provided rules.
+- `GSDESoil.calculate_weights`: Recomputes values from GSDE depths to MESH intervals.
+- `GSDESoil.calculate_mesh_values`: Extracts weighted values for each MESH soil layer.
+- `GSDESoil.merge_and_save_shapefile`: Merges and exports the enriched shapefile.
+- `NetCDFWriter.read_shapefile`: Reads the processed shapefile.
+- `NetCDFWriter.set_coordinates`: Assigns lat/lon using the drainage database.
+- `NetCDFWriter.write_netcdf`: Writes MESH-compatible parameter NetCDF file.
+
 
 ## Spatial Analysis
 
