@@ -144,14 +144,14 @@ def animate_mesh_outputs_to_gif(
         time_units = time_units.replace('years', 'days')  # fix units if needed
         calendar = getattr(time_var, 'calendar', 'standard')
         dates = nc.num2date(times, units=time_units, calendar=calendar)
-        starting_date = dates[1]
-        date_range_length = len(dates) - 1
+        starting_date = dates[0]
+        date_range_length = len(dates)
 
     # Determine global min/max for each variable
     global_min_max = {}
     for i, fname in enumerate(filenames):
         with nc.Dataset(os.path.join(netcdf_dir, fname)) as ds:
-            data = ds.variables[varnames[i]][1:]
+            data = ds.variables[varnames[i]][:]
             global_min_max[varnames[i]] = (np.nanmin(data), np.nanmax(data))
 
     # Internal animation logic
@@ -159,7 +159,7 @@ def animate_mesh_outputs_to_gif(
         def animate_frame(date_index):
             ax.clear()
             with nc.Dataset(os.path.join(netcdf_dir, filenames[i])) as ds:
-                values = ds.variables[varnames[i]][date_index + 1, :]
+                values = ds.variables[varnames[i]][date_index, :]
 
             merge_df = shp.copy()
             df['value'] = values

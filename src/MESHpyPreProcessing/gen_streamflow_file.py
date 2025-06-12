@@ -137,88 +137,220 @@ class GenStreamflowFile:
 
         combined_df = pd.DataFrame(data_dict)
         return combined_df, station_info
+        
+    def extract_flow_data_us_with_metadata(
+        self,
+        station_list: list[str],
+        start_date: str,
+        end_date: str,
+        limit: int = 1000
+    ) -> tuple[pd.DataFrame, list[dict]]:
+        """
+        Fetch daily‐mean discharge and full station metadata for USGS gauges.
 
-    def fetch_hydrometric_data_ca(self, station_numbers, start_date, end_date, limit=1000):
-        dates = self.create_date_range(start_date, end_date)
-        data_dict = {'Date': dates}
-        date_index_dict = {str(date.date()): idx for idx, date in enumerate(dates)}
-        station_info = []
-        print(len(station_numbers))
+        Parameters
+        ----------
+        station_list : list[str]
+            USGS station numbers (e.g. ['06132200']).
+        start_date : str
+            Start date in 'YYYY-MM-DD' format.
+        end_date : str
+            End   date in 'YYYY-MM-DD' format.
+        limit : int
+            Page size for API requests (default=1000).
 
-        # Initialize the data dictionary with -1 values for each station
-        for station_number in station_numbers:
-            data_dict[station_number] = [-1] * len(dates)  # Fill with -1 by default
-            
-            offset = 0
-            full_data = []
-            start_time_station = time.time()
-            
-            while True:
-                url = f"https://api.weather.gc.ca/collections/hydrometric-daily-mean/items"
-                params = {
-                    'STATION_NUMBER': station_number,
-                    'datetime': f"{start_date}/{end_date}",
-                    'limit': limit,
-                    'offset': offset,
-                    'f': 'json'
+        Returns
+        -------
+        df : pd.DataFrame
+            Indexed by Date, one column per station with daily mean discharge [m³/s].
+        station_info : list[dict]
+            Metadata for each station, including:
+              Station_Number, Station_Name, Latitude, Longitude,
+              Drainage_Area, Contrib_Drainage_Area, Elevation_m, Datum
+        """
+        # ensure numpy is imported: import numpy as np
+        # 1) build daily index
+        dates = pd.date_range(start=start_date, end=end_date, freq='D')
+        df = pd.DataFrame({'Date': dates})
+        idx = {d.strftime('%Y-%m-%d'): i for i, d in enumerate(dates)}
+        for st in station_list:
+            df[st] = np.nan
+
+        # 2) fetch daily‐mean via DV service
+        for st in station_list:
+            t0 = time.time()
+            r = requests.get(
+                "https://waterservices.usgs.gov/nwis/dv/",
+                params={
+                    'format':     'json',
+                    'sites':      st,
+                    'startDT':    start_date,
+                    'endDT':      end_date,
+                    'parameterCd':'00060',
+                    'statCd':     '00003'
                 }
+            )
+            r.raise_for_status()
+            series = r.json().get('value', {}).get('timeSeries', [])
+            if series:
+                for rec in series[0]['values'][0]['value']:
+                    date = rec['dateTime'][:10]
+                    try:
+                        val = float(rec['value'])
+                    except (TypeError, ValueError):
+                        val = np.nan
+                    if date in idx:
+                        df.iat[idx[date], df.columns.get_loc(st)] = val
+            print(f"Fetched DV for {st} in {time.time()-t0:.1f}s")
 
-                response = requests.get(url, params=params)
-                response_data = response.json()
+        df.set_index('Date', inplace=True)
 
-                if 'features' in response_data and response_data['features']:
-                    full_data.extend(response_data['features'])
-                    offset += limit
-                    if len(response_data['features']) < limit:
-                        break
-                else:
+        # 3) fetch expanded site metadata via RDB Site service
+        station_info = []
+        def to_float(x):
+            try: return float(x)
+            except: return np.nan
+
+        for st in station_list:
+            t0 = time.time()
+            r = requests.get(
+                "https://waterservices.usgs.gov/nwis/site",
+                params={
+                    'format':     'rdb',
+                    'sites':      st,
+                    'siteOutput': 'expanded',
+                    'siteStatus': 'all'
+                }
+            )
+            r.raise_for_status()
+            # strip comments, skip types row, read data row
+            lines = [L for L in r.text.splitlines() if not L.startswith('#') and L.strip()]
+            if len(lines) >= 3:
+                header = lines[0].split('\t')
+                values = lines[2].split('\t')
+                meta   = dict(zip(header, values))
+            else:
+                meta = {}
+
+            station_info.append({
+                'Station_Number':        meta.get('site_no', st),
+                'Station_Name':          meta.get('station_nm'),
+                'Latitude':              to_float(meta.get('dec_lat_va')),
+                'Longitude':             to_float(meta.get('dec_long_va')),
+                'Drainage_Area':         to_float(meta.get('drain_area_va')),
+                'Contrib_Drainage_Area': to_float(meta.get('contrib_drain_area_va')),
+                'Elevation_m':           to_float(meta.get('alt_va')),
+                'Datum':                 meta.get('vertical_datum')
+            })
+            print(f"Fetched metadata for {st} in {time.time()-t0:.1f}s")
+
+        return df, station_info
+    
+    def fetch_hydrometric_data_ca(
+        self,
+        station_numbers: list[str],
+        start_date: str,
+        end_date: str,
+        limit: int = 1000
+    ) -> tuple[pd.DataFrame, list[dict]]:
+        """
+        Fetch daily‐mean discharge and full station metadata for Canadian hydrometric stations.
+
+        Parameters
+        ----------
+        station_numbers : list of str
+            Environment Canada station IDs (e.g. ['05HG001', '05AG006']).
+        start_date : str
+            Start date in 'YYYY-MM-DD' format.
+        end_date : str
+            End date in 'YYYY-MM-DD' format.
+        limit : int, optional
+            API page size (default=1000).
+
+        Returns
+        -------
+        df : pandas.DataFrame
+            DataFrame indexed by Date, with one column per station containing daily mean discharge.
+        metadata : list of dict
+            List of station metadata dicts with keys:
+              Station_Number, Station_Name, CONTRIBUTOR_EN, PROV_TERR_STATE_LOC,
+              DRAINAGE_AREA_GROSS, DRAINAGE_AREA_EFFECT, REAL_TIME, RHBN,
+              STATUS_EN, VERTICAL_DATUM, Latitude, Longitude
+        """
+        # 1) build empty daily‐indexed DataFrame
+        dates = pd.date_range(start=start_date, end=end_date, freq='D')
+        data = {'Date': dates}
+        idx_map = {dt.strftime('%Y-%m-%d'): i for i, dt in enumerate(dates)}
+        for st in station_numbers:
+            data[st] = [None] * len(dates)
+        df = pd.DataFrame(data)
+
+        # 2) fetch daily‐mean discharge
+        for st in station_numbers:
+            offset = 0
+            feats_all = []
+            t0 = time.time()
+            while True:
+                url = "https://api.weather.gc.ca/collections/hydrometric-daily-mean/items"
+                params = {
+                    'STATION_NUMBER': st,
+                    'datetime':       f"{start_date}/{end_date}",
+                    'limit':          limit,
+                    'offset':         offset,
+                    'f':              'json'
+                }
+                r = requests.get(url, params=params)
+                r.raise_for_status()
+                feats = r.json().get('features', [])
+                if not feats:
                     break
-            
-            if full_data:
-                data_list = [
-                    {
-                        'Date': feature['properties']['DATE'],
-                        'value': feature['properties']['DISCHARGE'] if feature['properties']['DISCHARGE'] is not None else -1
-                    }
-                    for feature in full_data
-                ]
-                
-                flow_data = pd.DataFrame(data_list)
-                flow_data['value'] = pd.to_numeric(flow_data['value'], errors='coerce')
-                flow_data['Date'] = pd.to_datetime(flow_data['Date']).dt.date.astype(str)
+                feats_all.extend(feats)
+                offset += limit
+                if len(feats) < limit:
+                    break
 
-                for date, flow in zip(flow_data['Date'], flow_data['value']):
-                    if date in date_index_dict:
-                        date_index = date_index_dict[date]
-                        data_dict[station_number][date_index] = flow
+            for feat in feats_all:
+                p = feat['properties']
+                date_str = p['DATE']
+                disc = p.get('DISCHARGE')
+                if disc is None:
+                    continue
+                key = datetime.strptime(date_str, "%Y-%m-%d").strftime("%Y-%m-%d")
+                if key in idx_map:
+                    df.at[idx_map[key], st] = float(disc)
+            print(f"Fetched daily‐mean for {st} in {time.time()-t0:.1f}s")
 
-                first_feature = full_data[0]['properties']
-                #print("Properties:", first_feature)
-                geometry = full_data[0]['geometry']
-                #print("Geometry:", geometry)
-                station_info.append({
-                    'Station_Number': first_feature['STATION_NUMBER'],
-                    'Station_Name': first_feature['STATION_NAME'],
-                    'Latitude': geometry['coordinates'][1],
-                    'Longitude': geometry['coordinates'][0],
-                    'Drainage_Area': first_feature.get('DRAINAGE_AREA_GROSS', None)
+        # 3) fetch full station metadata
+        metadata = []
+        for st in station_numbers:
+            t0 = time.time()
+            url = "https://api.weather.gc.ca/collections/hydrometric-stations/items"
+            params = {'STATION_NUMBER': st, 'f': 'json', 'limit': 1}
+            r = requests.get(url, params=params)
+            r.raise_for_status()
+            feats = r.json().get('features', [])
+            if feats:
+                p = feats[0]['properties']
+                lon, lat = feats[0]['geometry']['coordinates']
+                metadata.append({
+                    'Station_Number':       p.get('STATION_NUMBER'),
+                    'Station_Name':         p.get('STATION_NAME'),
+                    'CONTRIBUTOR_EN':       p.get('CONTRIBUTOR_EN'),
+                    'PROV_TERR_STATE_LOC':  p.get('PROV_TERR_STATE_LOC'),
+                    'DRAINAGE_AREA_GROSS':  p.get('DRAINAGE_AREA_GROSS'),
+                    'DRAINAGE_AREA_EFFECT': p.get('DRAINAGE_AREA_EFFECT'),
+                    'REAL_TIME':            p.get('REAL_TIME'),
+                    'RHBN':                 p.get('RHBN'),
+                    'STATUS_EN':            p.get('STATUS_EN'),
+                    'VERTICAL_DATUM':       p.get('VERTICAL_DATUM'),
+                    'Latitude':             lat,
+                    'Longitude':            lon
                 })
             else:
-                print(f"Flow data not found for station: {station_number}")
-                # Append placeholder station info if data not found
-                station_info.append({
-                    'Station_Number': station_number,
-                    'Station_Name': "Unknown",
-                    'Latitude': -1,
-                    'Longitude': -1,
-                    'Drainage_Area': None
-                })
+                metadata.append({'Station_Number': st})
+            print(f"Fetched metadata for {st} in {time.time()-t0:.1f}s")
 
-            end_time_station = time.time()
-            print(f"Time taken to retrieve data for station {station_number}: {end_time_station - start_time_station} seconds")
-
-        combined_df = pd.DataFrame(data_dict)
-        return combined_df, station_info
+        return df.set_index('Date'), metadata
 
     def fetch_hydrometric_realtime_full_range(
         self,

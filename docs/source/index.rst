@@ -65,6 +65,7 @@ Jupyter Notebooks
    :caption: Examples
 
    MESH_StreamflowFilePrep.ipynb
+   Visualization.ipynb
 
 Indices and Tables
 ------------------
