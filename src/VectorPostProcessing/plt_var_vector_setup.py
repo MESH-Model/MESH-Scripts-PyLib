@@ -55,6 +55,14 @@ Parameters:
     Name of the NetCDF variable containing land use class names.
 - soldim : str, optional (default='nsol')
     Name of the NetCDF dimension representing soil layers.
+- vmin : float, optional
+    Lower bound for color scaling. If not provided, determined automatically per variable type.
+- vmax : float, optional
+    Upper bound for color scaling. If not provided, determined automatically per variable type.
+- sort_gru_by_mean : bool, optional (default=True)
+    If True, sorts GRUs by mean area fraction and adds percentage annotations in each subplot.
+    If False, plots GRUs in original order with no annotation.
+
 
 Processing Logic:
 ------------------
@@ -108,7 +116,11 @@ Example Usage:
 ...     comid_var='COMID',
 ...     landuse_classes=lclass,
 ...     grudim='NGRU',
-...     grunames_var='LandUse'
+...     grunames_var='LandUse',
+        soldim='nsol',    # from netcdf parameter file
+        vmin=None,
+    sort_gru_by_mean: bool = True,
+        vmax=None 
 ... )
 
 .. image:: Figures/GRU.png
@@ -177,7 +189,10 @@ def plt_var_from_vector_ddb_netcdf(
     landuse_classes=None,  # Optional land use classes as a numpy array or list
     grudim='NGRU',    # from netcdf ddb
     grunames_var='LandUse',  # from netcdf ddb
-    soldim='nsol'    # from netcdf parameter file
+    soldim='nsol',    # from netcdf parameter file
+    vmin=None,
+    sort_gru_by_mean: bool = True,
+    vmax=None 
 ):
     # Load and dissolve the shapefile to get a single boundary sub_agg_gdf
     sub_agg_gdf = gpd.read_file(output_basin_path).to_crs(epsg=4326)
@@ -210,7 +225,12 @@ def plt_var_from_vector_ddb_netcdf(
 
             sub_agg_ddb_merged_gdf = sub_agg_gdf.merge(df, left_on=comid_var, right_index=True, how='left')
 
-            vmin, vmax = sub_agg_ddb_merged_gdf[variable_name].min(), sub_agg_ddb_merged_gdf[variable_name].max()
+            #vmin, vmax = sub_agg_ddb_merged_gdf[variable_name].min(), sub_agg_ddb_merged_gdf[variable_name].max()
+            if vmin is None:
+                vmin = sub_agg_ddb_merged_gdf[variable_name].min()
+            if vmax is None:
+                vmax = sub_agg_ddb_merged_gdf[variable_name].max()
+
 
             # Plot the single variable with lat/lon as x and y axes
             fig, ax = plt.subplots(figsize=(8, 6))  #This needs to be inputs
@@ -232,8 +252,14 @@ def plt_var_from_vector_ddb_netcdf(
 
             sub_agg_ddb_merged_gdf = sub_agg_gdf.merge(df, left_on=comid_var, right_index=True, how='left')
 
-            percentage_pairs = [(landuse, round(sub_agg_ddb_merged_gdf[landuse].mean() * 100, 2)) for landuse in landuse_classes]
-            sorted_landuse_columns, sorted_percentages = zip(*sorted(percentage_pairs, key=lambda x: x[1], reverse=True))
+            if sort_gru_by_mean:
+                percentage_pairs = [(landuse, round(sub_agg_ddb_merged_gdf[landuse].mean() * 100, 2)) for landuse in landuse_classes]
+                sorted_landuse_columns, sorted_percentages = zip(*sorted(percentage_pairs, key=lambda x: x[1], reverse=True))
+                sorted_landuse_columns = [str(c) for c in sorted_landuse_columns]
+            else:
+                sorted_landuse_columns = [str(c) for c in landuse_classes]
+                sorted_percentages = [None] * len(sorted_landuse_columns)
+
 
             num_plots = len(sorted_landuse_columns)
             num_rows = math.floor(math.sqrt(num_plots))
@@ -251,14 +277,22 @@ def plt_var_from_vector_ddb_netcdf(
 
             for i, (col, percent) in enumerate(zip(sorted_landuse_columns, sorted_percentages)):
                 ax = axes.flatten()[i]
-                sub_agg_ddb_merged_gdf.plot(column=col, ax=ax, cmap=cmap, vmin=0.01, vmax=1)
+                #sub_agg_ddb_merged_gdf.plot(column=col, ax=ax, cmap=cmap, vmin=0.01, vmax=1)
+                if vmin is None:
+                    vmin = sub_agg_ddb_merged_gdf[sorted_landuse_columns].min().min()
+                if vmax is None:
+                    vmax = sub_agg_ddb_merged_gdf[sorted_landuse_columns].max().max()
+
+                sub_agg_ddb_merged_gdf.plot(column=col, ax=ax, cmap=cmap, vmin=vmin, vmax=vmax)
+
                 dissolved_basin.plot(ax=ax, edgecolor='black', linewidth=1, facecolor='none')
                 # Convert title to two lines
                 title = split_title(col)
                 ax.set_title(title, fontsize=font_size, ha='center')
                 #ax.set_title(col, fontsize=font_size, ha='center')
-                ax.text(text_location[0], text_location[1], f"{percent}%", transform=ax.transAxes, fontsize=font_size,
-                        verticalalignment='top', bbox=dict(boxstyle="round,pad=0.3", fc="white", ec="none", alpha=0.5))
+                if sort_gru_by_mean and percent is not None:
+                    ax.text(text_location[0], text_location[1], f"{percent}%", transform=ax.transAxes, fontsize=font_size,
+                            verticalalignment='top', bbox=dict(boxstyle="round,pad=0.3", fc="white", ec="none", alpha=0.5))
                 ax.set_xticks([])
                 ax.set_yticks([])
 
@@ -288,7 +322,12 @@ def plt_var_from_vector_ddb_netcdf(
 
             for i, col in enumerate(soil_layer_classes):
                 ax = axes.flatten()[i]
-                sub_agg_ddb_merged_gdf.plot(column=col, ax=ax, cmap=cmap, vmin=0.01, vmax=100)
+                if vmin is None:
+                    vmin = sub_agg_ddb_merged_gdf[soil_layer_classes].min().min()
+                if vmax is None:
+                    vmax = sub_agg_ddb_merged_gdf[soil_layer_classes].max().max()
+                sub_agg_ddb_merged_gdf.plot(column=col, ax=ax, cmap=cmap, vmin=vmin, vmax=vmax)
+
                 dissolved_basin.plot(ax=ax, edgecolor='black', linewidth=1)
                 ax.set_title(col, fontsize=font_size, ha='center')
                 ax.set_xticks([])
@@ -307,12 +346,18 @@ def plt_var_from_vector_ddb_netcdf(
         fig.subplots_adjust(**subplot_adjustments)
 
     # Set default values for vmin and vmax
-    if len(dims) == 1:
-        vmin, vmax = sub_agg_ddb_merged_gdf[variable_name].min(), sub_agg_ddb_merged_gdf[variable_name].max()
-    else:
-        vmin = 0.01
-        vmax = 1 if len(dims) == 2 and dims[1] == grudim else 100  # Set vmax based on the condition
-
+    # if vmin is None or vmax is None:
+    #     if len(dims) == 1:
+    #         if vmin is None:
+    #             vmin = sub_agg_ddb_merged_gdf[variable_name].min()
+    #         if vmax is None:
+    #             vmax = sub_agg_ddb_merged_gdf[variable_name].max()
+    #     elif len(dims) == 2 and dims[1] == grudim:
+    #         vmin = 0.01 if vmin is None else vmin
+    #         vmax = 1 if vmax is None else vmax
+    #     elif len(dims) == 2 and dims[1] == soldim:
+    #         vmin = 0.01 if vmin is None else vmin
+    #         vmax = 100 if vmax is None else vmax
     # Colorbar setup
     cbar_ax = fig.add_axes(cbar_location)
     sm = plt.cm.ScalarMappable(cmap=cmap, norm=mcolors.Normalize(vmin=vmin, vmax=vmax))

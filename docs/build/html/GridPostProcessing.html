@@ -52,6 +52,17 @@
 <li class="toctree-l1"><a class="reference internal" href="GridPreProcessing.html">GridPreProcessing package</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">GridPostProcessing package</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-GridPostProcessing.r2c_utils">GridPostProcessing.r2c_utils</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#GridPostProcessing.r2c_utils.clean_attribute_name"><code class="docutils literal notranslate"><span class="pre">clean_attribute_name()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#GridPostProcessing.r2c_utils.convert_to_2d"><code class="docutils literal notranslate"><span class="pre">convert_to_2d()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#GridPostProcessing.r2c_utils.plot_diff_panel_geo"><code class="docutils literal notranslate"><span class="pre">plot_diff_panel_geo()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#GridPostProcessing.r2c_utils.plot_r2c_panel_geo"><code class="docutils literal notranslate"><span class="pre">plot_r2c_panel_geo()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#GridPostProcessing.r2c_utils.read_r2c_file"><code class="docutils literal notranslate"><span class="pre">read_r2c_file()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#GridPostProcessing.r2c_utils.reorder_attributes"><code class="docutils literal notranslate"><span class="pre">reorder_attributes()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#GridPostProcessing.r2c_utils.reorder_matlab_data"><code class="docutils literal notranslate"><span class="pre">reorder_matlab_data()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#GridPostProcessing.r2c_utils.write_new_r2c"><code class="docutils literal notranslate"><span class="pre">write_new_r2c()</span></code></a></li>
+</ul>
+</li>
 </ul>
 </li>
 </ul>
@@ -90,6 +101,139 @@
 <h1>GridPostProcessing package<a class="headerlink" href="#gridpostprocessing-package" title="Link to this heading"></a></h1>
 <section id="submodules">
 <h2>Submodules<a class="headerlink" href="#submodules" title="Link to this heading"></a></h2>
+</section>
+<section id="module-GridPostProcessing.r2c_utils">
+<span id="gridpostprocessing-r2c-utils"></span><h2>GridPostProcessing.r2c_utils<a class="headerlink" href="#module-GridPostProcessing.r2c_utils" title="Link to this heading"></a></h2>
+<p>r2c_utils.py</p>
+<p>Utility functions to read, process, and write EnSim‐format .r2c ASCII files,
+reorder MATLAB GRU data arrays, convert to 2D grids, and clean attribute names.</p>
+<p>Utility functions to read, process, and write EnSim-format .r2c ASCII files,
+reorder MATLAB GRU data arrays, convert to 2D grids, clean attribute names,
+and produce small-multiples georeferenced plots (absolute or difference).</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="GridPostProcessing.r2c_utils.clean_attribute_name">
+<span class="sig-prename descclassname"><span class="pre">GridPostProcessing.r2c_utils.</span></span><span class="sig-name descname"><span class="pre">clean_attribute_name</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/GridPostProcessing/r2c_utils.html#clean_attribute_name"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#GridPostProcessing.r2c_utils.clean_attribute_name" title="Link to this definition"></a></dt>
+<dd><p>Strip parentheses and trailing whitespace from an attribute name.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>name</strong> (<em>str</em>) – Raw attribute name, possibly containing “(units)” or similar.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Cleaned name with text in parentheses removed.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="GridPostProcessing.r2c_utils.convert_to_2d">
+<span class="sig-prename descclassname"><span class="pre">GridPostProcessing.r2c_utils.</span></span><span class="sig-name descname"><span class="pre">convert_to_2d</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">gru_data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/GridPostProcessing/r2c_utils.html#convert_to_2d"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#GridPostProcessing.r2c_utils.convert_to_2d" title="Link to this definition"></a></dt>
+<dd><p>Convert a 1D object array of 1D arrays into a 2D float array.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>gru_data</strong> (<em>np.ndarray</em><em>, </em><em>dtype=object</em>) – Object array where each element is a 1D numeric sequence.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>2D array of shape (layers, length) or None on failure.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>np.ndarray or None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="GridPostProcessing.r2c_utils.plot_diff_panel_geo">
+<span class="sig-prename descclassname"><span class="pre">GridPostProcessing.r2c_utils.</span></span><span class="sig-name descname"><span class="pre">plot_diff_panel_geo</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">base_mat</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scen_mat</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">header_info</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">attributes</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">subset_ids</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">skip_idxs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">panel_title</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">out_file</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/GridPostProcessing/r2c_utils.html#plot_diff_panel_geo"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#GridPostProcessing.r2c_utils.plot_diff_panel_geo" title="Link to this definition"></a></dt>
+<dd><p>Small-multiples of (scen – base) for each attribute in subset_ids.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="GridPostProcessing.r2c_utils.plot_r2c_panel_geo">
+<span class="sig-prename descclassname"><span class="pre">GridPostProcessing.r2c_utils.</span></span><span class="sig-name descname"><span class="pre">plot_r2c_panel_geo</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mat</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">header_info</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">attributes</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">subset_ids</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">skip_idxs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">panel_title</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">out_file</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cmap</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'viridis'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vmin</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vmax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/GridPostProcessing/r2c_utils.html#plot_r2c_panel_geo"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#GridPostProcessing.r2c_utils.plot_r2c_panel_geo" title="Link to this definition"></a></dt>
+<dd><p>Small-multiples of the raw .r2c layers in mat.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="GridPostProcessing.r2c_utils.read_r2c_file">
+<span class="sig-prename descclassname"><span class="pre">GridPostProcessing.r2c_utils.</span></span><span class="sig-name descname"><span class="pre">read_r2c_file</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file_path</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/GridPostProcessing/r2c_utils.html#read_r2c_file"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#GridPostProcessing.r2c_utils.read_r2c_file" title="Link to this definition"></a></dt>
+<dd><p>Read an EnSim‐format .r2c ASCII file and return header info, attribute metadata,
+and the 3D data array.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>file_path</strong> (<em>str</em>) – Path to the .r2c file.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><strong>header_info</strong> (<em>dict[str, str]</em>) – Mapping from header keys (e.g. ‘:xCount’, ‘:yOrigin’) to their values.</p></li>
+<li><p><strong>attributes</strong> (<em>dict[int, dict]</em>) – Mapping from attribute ID → {‘name’: str, ‘type’: str|None, ‘units’: str|None}.</p></li>
+<li><p><strong>data_matrix</strong> (<em>np.ndarray, shape (n_attributes, n_rows, n_cols)</em>) – The numeric grid values, reshaped according to header counts.</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="GridPostProcessing.r2c_utils.reorder_attributes">
+<span class="sig-prename descclassname"><span class="pre">GridPostProcessing.r2c_utils.</span></span><span class="sig-name descname"><span class="pre">reorder_attributes</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">attribute_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">new_order_ids</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">attributes</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/GridPostProcessing/r2c_utils.html#reorder_attributes"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#GridPostProcessing.r2c_utils.reorder_attributes" title="Link to this definition"></a></dt>
+<dd><p>Reorder a flat name→2D-array dict according to a list of attribute IDs.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>attribute_data</strong> (<em>dict</em><em>[</em><em>str</em><em>, </em><em>np.ndarray</em><em>]</em>) – Mapping attribute name → 2D array as read from a .r2c.</p></li>
+<li><p><strong>new_order_ids</strong> (<em>list</em><em>[</em><em>int</em><em>]</em>) – 1-based attribute IDs in the order you want to write them.</p></li>
+<li><p><strong>attributes</strong> (<em>dict</em><em>[</em><em>int</em><em>, </em><em>dict</em><em>]</em>) – Original mapping from attribute ID → metadata dict returned by read_r2c_file.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><strong>ordered_attributes</strong> (<em>dict[int, dict]</em>) – New ID→metadata, where IDs run 1..N in the new sequence.</p></li>
+<li><p><strong>ordered_attribute_data</strong> (<em>dict[str, np.ndarray]</em>) – Mapping attribute name → 2D array, in the same new sequence.</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="GridPostProcessing.r2c_utils.reorder_matlab_data">
+<span class="sig-prename descclassname"><span class="pre">GridPostProcessing.r2c_utils.</span></span><span class="sig-name descname"><span class="pre">reorder_matlab_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">gru_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">order_ids</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/GridPostProcessing/r2c_utils.html#reorder_matlab_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#GridPostProcessing.r2c_utils.reorder_matlab_data" title="Link to this definition"></a></dt>
+<dd><p>Reorder a MATLAB‐loaded GRU struct array into a specified field sequence.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>gru_data</strong> (<em>np.ndarray</em><em>, </em><em>dtype=object</em><em> or </em><em>structured</em>) – A 1×1 struct array from scipy.io.loadmat.</p></li>
+<li><p><strong>order_ids</strong> (<em>list</em><em>[</em><em>int</em><em>]</em>) – 1-based indices indicating the new order of fields.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Each entry is the original gru_data[field][0,0] in the new sequence.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>np.ndarray of object, shape (len(order_ids),)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="GridPostProcessing.r2c_utils.write_new_r2c">
+<span class="sig-prename descclassname"><span class="pre">GridPostProcessing.r2c_utils.</span></span><span class="sig-name descname"><span class="pre">write_new_r2c</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">new_file_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">header_info</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ordered_attributes</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">attribute_data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/GridPostProcessing/r2c_utils.html#write_new_r2c"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#GridPostProcessing.r2c_utils.write_new_r2c" title="Link to this definition"></a></dt>
+<dd><p>Write a new .r2c file from header info, attribute metadata, and grid data.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>new_file_path</strong> (<em>str</em>) – Path to write the .r2c file.</p></li>
+<li><p><strong>header_info</strong> (<em>dict</em><em>[</em><em>str</em><em>, </em><em>str</em><em>]</em>) – Header key→value mapping (as from read_r2c_file).</p></li>
+<li><p><strong>ordered_attributes</strong> (<em>dict</em><em>[</em><em>int</em><em>, </em><em>dict</em><em>]</em>) – Attribute ID→metadata dict specifying write order.</p></li>
+<li><p><strong>attribute_data</strong> (<em>dict</em><em>[</em><em>str</em><em>, </em><em>np.ndarray</em><em>]</em>) – Mapping attribute name→2D array of shape (n_rows, n_cols).</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
 </section>
 </section>
 

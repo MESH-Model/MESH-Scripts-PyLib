@@ -112,6 +112,11 @@
 <li class="toctree-l3"><a class="reference internal" href="#VectorPreProcessing.remap_climate_to_ddb.remap_rdrs_climate_data_single_year"><code class="docutils literal notranslate"><span class="pre">remap_rdrs_climate_data_single_year()</span></code></a></li>
 </ul>
 </li>
+<li class="toctree-l2"><a class="reference internal" href="#slurm-script-usage">SLURM Script Usage</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#typical-usage">Typical Usage</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#slurm-shell-script">SLURM Shell Script</a></li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="#module-VectorPreProcessing">Module contents</a></li>
 </ul>
 </li>
@@ -1093,6 +1098,132 @@ Output is a GeoDataFrame with mesh values appended as new attributes.</p>
 </div>
 </dd></dl>
 
+</section>
+<section id="slurm-script-usage">
+<h2>SLURM Script Usage<a class="headerlink" href="#slurm-script-usage" title="Link to this heading"></a></h2>
+<p>This SLURM script demonstrates how to use the functions
+<code class="docutils literal notranslate"><span class="pre">remap_rdrs_climate_data</span></code> and <code class="docutils literal notranslate"><span class="pre">remap_rdrs_climate_data_single_year</span></code> in an HPC environment.</p>
+<section id="typical-usage">
+<h3>Typical Usage<a class="headerlink" href="#typical-usage" title="Link to this heading"></a></h3>
+<p>Run all sections in a single job:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>sbatch<span class="w"> </span>Forcing_RDRS_processingMet3.sh<span class="w"> </span>--section1<span class="w"> </span>--section2<span class="w"> </span>--section3
+</pre></div>
+</div>
+<p>Run each year in parallel using SLURM array jobs:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>sbatch<span class="w"> </span>--array<span class="o">=</span><span class="m">0</span>-38<span class="w"> </span>Forcing_RDRS_processingMet3.sh<span class="w"> </span>--section1
+</pre></div>
+</div>
+</section>
+<section id="slurm-shell-script">
+<h3>SLURM Shell Script<a class="headerlink" href="#slurm-shell-script" title="Link to this heading"></a></h3>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="ch">#!/bin/bash</span>
+<span class="c1">#SBATCH --account=rpp-kshook</span>
+<span class="c1">#SBATCH --nodes=1</span>
+<span class="c1">#SBATCH --tasks-per-node=1</span>
+<span class="c1">#SBATCH --mem-per-cpu=30G</span>
+<span class="c1">#SBATCH --time=24:00:00</span>
+<span class="c1">#SBATCH --job-name=vectForcRDRS</span>
+<span class="c1">#SBATCH --mail-user=fuad.yassin@usask.ca</span>
+<span class="c1">#SBATCH --mail-type=BEGIN,END,FAIL</span>
+
+:<span class="w"> </span><span class="s1">&#39;</span>
+<span class="s1">This script processes climate forcing data for the vector-based MESH RDRS dataset.</span>
+<span class="s1">Supports array jobs and all-years processing.</span>
+<span class="s1">&#39;</span>
+
+module<span class="w"> </span>load<span class="w"> </span>cdo
+module<span class="w"> </span>load<span class="w"> </span>nco
+
+<span class="nv">basin</span><span class="o">=</span><span class="s2">&quot;sras&quot;</span>
+<span class="nv">start_year</span><span class="o">=</span><span class="m">1980</span>
+<span class="nv">end_year</span><span class="o">=</span><span class="m">2018</span>
+<span class="nv">input_forcing_easymore</span><span class="o">=</span><span class="s1">&#39;/scratch/fuaday/sras-agg-model/easymore-outputs&#39;</span>
+<span class="nv">ddb_remapped_output_forcing</span><span class="o">=</span><span class="s1">&#39;/scratch/fuaday/sras-agg-model/easymore-outputs2&#39;</span>
+<span class="nv">input_basin</span><span class="o">=</span><span class="s1">&#39;/scratch/fuaday/sras-agg-model/geofabric-outputs/sras_subbasins_MAF_Agg.shp&#39;</span>
+<span class="nv">input_ddb</span><span class="o">=</span><span class="s1">&#39;/scratch/fuaday/sras-agg-model/MESH-sras-agg/MESH_drainage_database.nc&#39;</span>
+<span class="nv">dir_merged_file</span><span class="o">=</span><span class="s2">&quot;/scratch/fuaday/sras-agg-model/easymore-outputs-merged&quot;</span>
+<span class="nv">merged_file</span><span class="o">=</span><span class="s2">&quot;</span><span class="si">${</span><span class="nv">dir_merged_file</span><span class="si">}</span><span class="s2">/</span><span class="si">${</span><span class="nv">basin</span><span class="si">}</span><span class="s2">_rdrs_</span><span class="si">${</span><span class="nv">start_year</span><span class="si">}</span><span class="s2">_</span><span class="si">${</span><span class="nv">end_year</span><span class="si">}</span><span class="s2">_v21_allVar.nc&quot;</span>
+
+<span class="nb">source</span><span class="w"> </span><span class="nv">$HOME</span>/virtual-envs/scienv/bin/activate
+module<span class="w"> </span>load<span class="w"> </span>StdEnv/2020
+module<span class="w"> </span>load<span class="w"> </span>gcc/9.3.0
+module<span class="w"> </span>restore<span class="w"> </span>scimods
+module<span class="w"> </span>load<span class="w"> </span>cdo
+module<span class="w"> </span>load<span class="w"> </span>nco
+
+<span class="k">function</span><span class="w"> </span>run_section1_single_year<span class="w"> </span><span class="o">{</span>
+<span class="w">    </span><span class="nb">local</span><span class="w"> </span><span class="nv">year</span><span class="o">=</span><span class="nv">$1</span>
+<span class="w">    </span>python<span class="w"> </span>-c<span class="w"> </span><span class="s2">&quot;</span>
+<span class="s2">import sys</span>
+<span class="s2">sys.path.append(&#39;</span><span class="nv">$HOME</span><span class="s2">/virtual-envs/scienv/lib/python3.8/site-packages&#39;)</span>
+<span class="s2">from MESHpyPreProcessing.remap_rdrs_climate_data import remap_rdrs_climate_data_single_year</span>
+<span class="s2">remap_rdrs_climate_data_single_year(</span>
+<span class="s2">    input_directory=&#39;</span><span class="nv">$input_forcing_easymore</span><span class="s2">&#39;,</span>
+<span class="s2">    output_directory=&#39;</span><span class="nv">$ddb_remapped_output_forcing</span><span class="s2">&#39;,</span>
+<span class="s2">    input_basin=&#39;</span><span class="nv">$input_basin</span><span class="s2">&#39;,</span>
+<span class="s2">    input_ddb=&#39;</span><span class="nv">$input_ddb</span><span class="s2">&#39;,</span>
+<span class="s2">    year=</span><span class="nv">$year</span>
+<span class="s2">)</span>
+<span class="s2">&quot;</span>
+<span class="o">}</span>
+
+<span class="k">function</span><span class="w"> </span>run_section1_all_years<span class="w"> </span><span class="o">{</span>
+<span class="w">    </span>python<span class="w"> </span>-c<span class="w"> </span><span class="s2">&quot;</span>
+<span class="s2">import sys</span>
+<span class="s2">sys.path.append(&#39;</span><span class="nv">$HOME</span><span class="s2">/virtual-envs/scienv/lib/python3.8/site-packages&#39;)</span>
+<span class="s2">from MESHpyPreProcessing.remap_rdrs_climate_data import remap_rdrs_climate_data</span>
+<span class="s2">remap_rdrs_climate_data(</span>
+<span class="s2">    input_directory=&#39;</span><span class="nv">$input_forcing_easymore</span><span class="s2">&#39;,</span>
+<span class="s2">    output_directory=&#39;</span><span class="nv">$ddb_remapped_output_forcing</span><span class="s2">&#39;,</span>
+<span class="s2">    input_basin=&#39;</span><span class="nv">$input_basin</span><span class="s2">&#39;,</span>
+<span class="s2">    input_ddb=&#39;</span><span class="nv">$input_ddb</span><span class="s2">&#39;,</span>
+<span class="s2">    start_year=</span><span class="nv">$start_year</span><span class="s2">,</span>
+<span class="s2">    end_year=</span><span class="nv">$end_year</span>
+<span class="s2">)</span>
+<span class="s2">&quot;</span>
+<span class="o">}</span>
+
+<span class="k">function</span><span class="w"> </span>run_section2<span class="w"> </span><span class="o">{</span>
+<span class="w">    </span>mkdir<span class="w"> </span>-p<span class="w"> </span><span class="s2">&quot;</span><span class="nv">$dir_merged_file</span><span class="s2">&quot;</span>
+<span class="w">    </span><span class="nv">merge_cmd</span><span class="o">=</span><span class="s2">&quot;cdo mergetime&quot;</span>
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="o">((</span><span class="w"> </span><span class="nv">year</span><span class="o">=</span><span class="nv">$start_year</span><span class="p">;</span><span class="w"> </span>year&lt;<span class="o">=</span><span class="nv">$end_year</span><span class="p">;</span><span class="w"> </span>year++<span class="w"> </span><span class="o">))</span><span class="p">;</span><span class="w"> </span><span class="k">do</span>
+<span class="w">        </span><span class="nv">merge_cmd</span><span class="o">+=</span><span class="s2">&quot; </span><span class="si">${</span><span class="nv">ddb_remapped_output_forcing</span><span class="si">}</span><span class="s2">/remapped_remapped_ncrb_model_</span><span class="si">${</span><span class="nv">year</span><span class="si">}</span><span class="s2">*.nc&quot;</span>
+<span class="w">    </span><span class="k">done</span>
+<span class="w">    </span><span class="nv">$merge_cmd</span><span class="w"> </span><span class="s2">&quot;</span><span class="nv">$merged_file</span><span class="s2">&quot;</span>
+<span class="o">}</span>
+
+<span class="k">function</span><span class="w"> </span>run_section3<span class="w"> </span><span class="o">{</span>
+<span class="w">    </span>ncatted<span class="w"> </span>-O<span class="w"> </span>-a<span class="w"> </span>units,RDRS_v2.1_P_TT_09944,o,c,<span class="s2">&quot;K&quot;</span><span class="w"> </span><span class="s2">&quot;</span><span class="nv">$merged_file</span><span class="s2">&quot;</span>
+<span class="w">    </span>ncatted<span class="w"> </span>-O<span class="w"> </span>-a<span class="w"> </span>units,RDRS_v2.1_P_P0_SFC,o,c,<span class="s2">&quot;Pa&quot;</span><span class="w"> </span><span class="s2">&quot;</span><span class="nv">$merged_file</span><span class="s2">&quot;</span>
+<span class="w">    </span>ncatted<span class="w"> </span>-O<span class="w"> </span>-a<span class="w"> </span>units,RDRS_v2.1_P_UVC_09944,o,c,<span class="s2">&quot;m s-1&quot;</span><span class="w"> </span><span class="s2">&quot;</span><span class="nv">$merged_file</span><span class="s2">&quot;</span>
+<span class="w">    </span>ncatted<span class="w"> </span>-O<span class="w"> </span>-a<span class="w"> </span>units,RDRS_v2.1_A_PR0_SFC,o,c,<span class="s2">&quot;mm s-1&quot;</span><span class="w"> </span><span class="s2">&quot;</span><span class="nv">$merged_file</span><span class="s2">&quot;</span>
+
+<span class="w">    </span><span class="nv">temp_file</span><span class="o">=</span><span class="s2">&quot;</span><span class="si">${</span><span class="nv">dir_merged_file</span><span class="si">}</span><span class="s2">/</span><span class="si">${</span><span class="nv">basin</span><span class="si">}</span><span class="s2">_temp.nc&quot;</span>
+<span class="w">    </span>cdo<span class="w"> </span>-z<span class="w"> </span>zip<span class="w"> </span>-b<span class="w"> </span>F32<span class="w"> </span>-aexpr,<span class="s1">&#39;RDRS_v2.1_P_TT_09944=RDRS_v2.1_P_TT_09944 + 273.15; RDRS_v2.1_P_P0_SFC=RDRS_v2.1_P_P0_SFC * 100.0; RDRS_v2.1_P_UVC_09944=RDRS_v2.1_P_UVC_09944 * 0.514444; RDRS_v2.1_A_PR0_SFC=RDRS_v2.1_A_PR0_SFC / 3.6&#39;</span><span class="w"> </span><span class="s2">&quot;</span><span class="nv">$merged_file</span><span class="s2">&quot;</span><span class="w"> </span><span class="s2">&quot;</span><span class="nv">$temp_file</span><span class="s2">&quot;</span>
+<span class="w">    </span>mv<span class="w"> </span><span class="s2">&quot;</span><span class="nv">$temp_file</span><span class="s2">&quot;</span><span class="w"> </span><span class="s2">&quot;</span><span class="nv">$merged_file</span><span class="s2">&quot;</span>
+<span class="o">}</span>
+
+<span class="k">for</span><span class="w"> </span>arg<span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="s2">&quot;</span><span class="nv">$@</span><span class="s2">&quot;</span><span class="p">;</span><span class="w"> </span><span class="k">do</span>
+<span class="w">    </span><span class="k">case</span><span class="w"> </span><span class="nv">$arg</span><span class="w"> </span><span class="k">in</span>
+<span class="w">        </span>--section1<span class="o">)</span>
+<span class="w">            </span><span class="k">if</span><span class="w"> </span><span class="o">[</span><span class="w"> </span>-z<span class="w"> </span><span class="s2">&quot;</span><span class="nv">$SLURM_ARRAY_TASK_ID</span><span class="s2">&quot;</span><span class="w"> </span><span class="o">]</span><span class="p">;</span><span class="w"> </span><span class="k">then</span>
+<span class="w">                </span>run_section1_all_years
+<span class="w">            </span><span class="k">else</span>
+<span class="w">                </span><span class="nv">year</span><span class="o">=</span><span class="k">$((</span><span class="nv">start_year</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="nv">SLURM_ARRAY_TASK_ID</span><span class="k">))</span>
+<span class="w">                </span>run_section1_single_year<span class="w"> </span><span class="nv">$year</span>
+<span class="w">            </span><span class="k">fi</span>
+<span class="w">            </span><span class="p">;;</span>
+<span class="w">        </span>--section2<span class="o">)</span>
+<span class="w">            </span>run_section2
+<span class="w">            </span><span class="p">;;</span>
+<span class="w">        </span>--section3<span class="o">)</span>
+<span class="w">            </span>run_section3
+<span class="w">            </span><span class="p">;;</span>
+<span class="w">    </span><span class="k">esac</span>
+<span class="k">done</span>
+</pre></div>
+</div>
+</section>
 </section>
 <section id="module-VectorPreProcessing">
 <span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-VectorPreProcessing" title="Link to this heading"></a></h2>

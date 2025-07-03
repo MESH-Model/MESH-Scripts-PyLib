@@ -137,6 +137,14 @@
 <span class="sd">    Name of the NetCDF variable containing land use class names.</span>
 <span class="sd">- soldim : str, optional (default=&#39;nsol&#39;)</span>
 <span class="sd">    Name of the NetCDF dimension representing soil layers.</span>
+<span class="sd">- vmin : float, optional</span>
+<span class="sd">    Lower bound for color scaling. If not provided, determined automatically per variable type.</span>
+<span class="sd">- vmax : float, optional</span>
+<span class="sd">    Upper bound for color scaling. If not provided, determined automatically per variable type.</span>
+<span class="sd">- sort_gru_by_mean : bool, optional (default=True)</span>
+<span class="sd">    If True, sorts GRUs by mean area fraction and adds percentage annotations in each subplot.</span>
+<span class="sd">    If False, plots GRUs in original order with no annotation.</span>
+
 
 <span class="sd">Processing Logic:</span>
 <span class="sd">------------------</span>
@@ -190,7 +198,11 @@
 <span class="sd">...     comid_var=&#39;COMID&#39;,</span>
 <span class="sd">...     landuse_classes=lclass,</span>
 <span class="sd">...     grudim=&#39;NGRU&#39;,</span>
-<span class="sd">...     grunames_var=&#39;LandUse&#39;</span>
+<span class="sd">...     grunames_var=&#39;LandUse&#39;,</span>
+<span class="sd">        soldim=&#39;nsol&#39;,    # from netcdf parameter file</span>
+<span class="sd">        vmin=None,</span>
+<span class="sd">    sort_gru_by_mean: bool = True,</span>
+<span class="sd">        vmax=None </span>
 <span class="sd">... )</span>
 
 <span class="sd">.. image:: Figures/GRU.png</span>
@@ -261,7 +273,10 @@
     <span class="n">landuse_classes</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>  <span class="c1"># Optional land use classes as a numpy array or list</span>
     <span class="n">grudim</span><span class="o">=</span><span class="s1">&#39;NGRU&#39;</span><span class="p">,</span>    <span class="c1"># from netcdf ddb</span>
     <span class="n">grunames_var</span><span class="o">=</span><span class="s1">&#39;LandUse&#39;</span><span class="p">,</span>  <span class="c1"># from netcdf ddb</span>
-    <span class="n">soldim</span><span class="o">=</span><span class="s1">&#39;nsol&#39;</span>    <span class="c1"># from netcdf parameter file</span>
+    <span class="n">soldim</span><span class="o">=</span><span class="s1">&#39;nsol&#39;</span><span class="p">,</span>    <span class="c1"># from netcdf parameter file</span>
+    <span class="n">vmin</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">sort_gru_by_mean</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+    <span class="n">vmax</span><span class="o">=</span><span class="kc">None</span> 
 <span class="p">):</span>
     <span class="c1"># Load and dissolve the shapefile to get a single boundary sub_agg_gdf</span>
     <span class="n">sub_agg_gdf</span> <span class="o">=</span> <span class="n">gpd</span><span class="o">.</span><span class="n">read_file</span><span class="p">(</span><span class="n">output_basin_path</span><span class="p">)</span><span class="o">.</span><span class="n">to_crs</span><span class="p">(</span><span class="n">epsg</span><span class="o">=</span><span class="mi">4326</span><span class="p">)</span>
@@ -294,7 +309,12 @@
 
             <span class="n">sub_agg_ddb_merged_gdf</span> <span class="o">=</span> <span class="n">sub_agg_gdf</span><span class="o">.</span><span class="n">merge</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">left_on</span><span class="o">=</span><span class="n">comid_var</span><span class="p">,</span> <span class="n">right_index</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">how</span><span class="o">=</span><span class="s1">&#39;left&#39;</span><span class="p">)</span>
 
-            <span class="n">vmin</span><span class="p">,</span> <span class="n">vmax</span> <span class="o">=</span> <span class="n">sub_agg_ddb_merged_gdf</span><span class="p">[</span><span class="n">variable_name</span><span class="p">]</span><span class="o">.</span><span class="n">min</span><span class="p">(),</span> <span class="n">sub_agg_ddb_merged_gdf</span><span class="p">[</span><span class="n">variable_name</span><span class="p">]</span><span class="o">.</span><span class="n">max</span><span class="p">()</span>
+            <span class="c1">#vmin, vmax = sub_agg_ddb_merged_gdf[variable_name].min(), sub_agg_ddb_merged_gdf[variable_name].max()</span>
+            <span class="k">if</span> <span class="n">vmin</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">vmin</span> <span class="o">=</span> <span class="n">sub_agg_ddb_merged_gdf</span><span class="p">[</span><span class="n">variable_name</span><span class="p">]</span><span class="o">.</span><span class="n">min</span><span class="p">()</span>
+            <span class="k">if</span> <span class="n">vmax</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">vmax</span> <span class="o">=</span> <span class="n">sub_agg_ddb_merged_gdf</span><span class="p">[</span><span class="n">variable_name</span><span class="p">]</span><span class="o">.</span><span class="n">max</span><span class="p">()</span>
+
 
             <span class="c1"># Plot the single variable with lat/lon as x and y axes</span>
             <span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">8</span><span class="p">,</span> <span class="mi">6</span><span class="p">))</span>  <span class="c1">#This needs to be inputs</span>
@@ -316,8 +336,14 @@
 
             <span class="n">sub_agg_ddb_merged_gdf</span> <span class="o">=</span> <span class="n">sub_agg_gdf</span><span class="o">.</span><span class="n">merge</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">left_on</span><span class="o">=</span><span class="n">comid_var</span><span class="p">,</span> <span class="n">right_index</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">how</span><span class="o">=</span><span class="s1">&#39;left&#39;</span><span class="p">)</span>
 
-            <span class="n">percentage_pairs</span> <span class="o">=</span> <span class="p">[(</span><span class="n">landuse</span><span class="p">,</span> <span class="nb">round</span><span class="p">(</span><span class="n">sub_agg_ddb_merged_gdf</span><span class="p">[</span><span class="n">landuse</span><span class="p">]</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span> <span class="o">*</span> <span class="mi">100</span><span class="p">,</span> <span class="mi">2</span><span class="p">))</span> <span class="k">for</span> <span class="n">landuse</span> <span class="ow">in</span> <span class="n">landuse_classes</span><span class="p">]</span>
-            <span class="n">sorted_landuse_columns</span><span class="p">,</span> <span class="n">sorted_percentages</span> <span class="o">=</span> <span class="nb">zip</span><span class="p">(</span><span class="o">*</span><span class="nb">sorted</span><span class="p">(</span><span class="n">percentage_pairs</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">reverse</span><span class="o">=</span><span class="kc">True</span><span class="p">))</span>
+            <span class="k">if</span> <span class="n">sort_gru_by_mean</span><span class="p">:</span>
+                <span class="n">percentage_pairs</span> <span class="o">=</span> <span class="p">[(</span><span class="n">landuse</span><span class="p">,</span> <span class="nb">round</span><span class="p">(</span><span class="n">sub_agg_ddb_merged_gdf</span><span class="p">[</span><span class="n">landuse</span><span class="p">]</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span> <span class="o">*</span> <span class="mi">100</span><span class="p">,</span> <span class="mi">2</span><span class="p">))</span> <span class="k">for</span> <span class="n">landuse</span> <span class="ow">in</span> <span class="n">landuse_classes</span><span class="p">]</span>
+                <span class="n">sorted_landuse_columns</span><span class="p">,</span> <span class="n">sorted_percentages</span> <span class="o">=</span> <span class="nb">zip</span><span class="p">(</span><span class="o">*</span><span class="nb">sorted</span><span class="p">(</span><span class="n">percentage_pairs</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">reverse</span><span class="o">=</span><span class="kc">True</span><span class="p">))</span>
+                <span class="n">sorted_landuse_columns</span> <span class="o">=</span> <span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">c</span><span class="p">)</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">sorted_landuse_columns</span><span class="p">]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">sorted_landuse_columns</span> <span class="o">=</span> <span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">c</span><span class="p">)</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">landuse_classes</span><span class="p">]</span>
+                <span class="n">sorted_percentages</span> <span class="o">=</span> <span class="p">[</span><span class="kc">None</span><span class="p">]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">sorted_landuse_columns</span><span class="p">)</span>
+
 
             <span class="n">num_plots</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">sorted_landuse_columns</span><span class="p">)</span>
             <span class="n">num_rows</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">floor</span><span class="p">(</span><span class="n">math</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">num_plots</span><span class="p">))</span>
@@ -335,14 +361,22 @@
 
             <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="p">(</span><span class="n">col</span><span class="p">,</span> <span class="n">percent</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">sorted_landuse_columns</span><span class="p">,</span> <span class="n">sorted_percentages</span><span class="p">)):</span>
                 <span class="n">ax</span> <span class="o">=</span> <span class="n">axes</span><span class="o">.</span><span class="n">flatten</span><span class="p">()[</span><span class="n">i</span><span class="p">]</span>
-                <span class="n">sub_agg_ddb_merged_gdf</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">column</span><span class="o">=</span><span class="n">col</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">,</span> <span class="n">cmap</span><span class="o">=</span><span class="n">cmap</span><span class="p">,</span> <span class="n">vmin</span><span class="o">=</span><span class="mf">0.01</span><span class="p">,</span> <span class="n">vmax</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+                <span class="c1">#sub_agg_ddb_merged_gdf.plot(column=col, ax=ax, cmap=cmap, vmin=0.01, vmax=1)</span>
+                <span class="k">if</span> <span class="n">vmin</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="n">vmin</span> <span class="o">=</span> <span class="n">sub_agg_ddb_merged_gdf</span><span class="p">[</span><span class="n">sorted_landuse_columns</span><span class="p">]</span><span class="o">.</span><span class="n">min</span><span class="p">()</span><span class="o">.</span><span class="n">min</span><span class="p">()</span>
+                <span class="k">if</span> <span class="n">vmax</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="n">vmax</span> <span class="o">=</span> <span class="n">sub_agg_ddb_merged_gdf</span><span class="p">[</span><span class="n">sorted_landuse_columns</span><span class="p">]</span><span class="o">.</span><span class="n">max</span><span class="p">()</span><span class="o">.</span><span class="n">max</span><span class="p">()</span>
+
+                <span class="n">sub_agg_ddb_merged_gdf</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">column</span><span class="o">=</span><span class="n">col</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">,</span> <span class="n">cmap</span><span class="o">=</span><span class="n">cmap</span><span class="p">,</span> <span class="n">vmin</span><span class="o">=</span><span class="n">vmin</span><span class="p">,</span> <span class="n">vmax</span><span class="o">=</span><span class="n">vmax</span><span class="p">)</span>
+
                 <span class="n">dissolved_basin</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">,</span> <span class="n">edgecolor</span><span class="o">=</span><span class="s1">&#39;black&#39;</span><span class="p">,</span> <span class="n">linewidth</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">facecolor</span><span class="o">=</span><span class="s1">&#39;none&#39;</span><span class="p">)</span>
                 <span class="c1"># Convert title to two lines</span>
                 <span class="n">title</span> <span class="o">=</span> <span class="n">split_title</span><span class="p">(</span><span class="n">col</span><span class="p">)</span>
                 <span class="n">ax</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="n">title</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="n">font_size</span><span class="p">,</span> <span class="n">ha</span><span class="o">=</span><span class="s1">&#39;center&#39;</span><span class="p">)</span>
                 <span class="c1">#ax.set_title(col, fontsize=font_size, ha=&#39;center&#39;)</span>
-                <span class="n">ax</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="n">text_location</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">text_location</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">percent</span><span class="si">}</span><span class="s2">%&quot;</span><span class="p">,</span> <span class="n">transform</span><span class="o">=</span><span class="n">ax</span><span class="o">.</span><span class="n">transAxes</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="n">font_size</span><span class="p">,</span>
-                        <span class="n">verticalalignment</span><span class="o">=</span><span class="s1">&#39;top&#39;</span><span class="p">,</span> <span class="n">bbox</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">boxstyle</span><span class="o">=</span><span class="s2">&quot;round,pad=0.3&quot;</span><span class="p">,</span> <span class="n">fc</span><span class="o">=</span><span class="s2">&quot;white&quot;</span><span class="p">,</span> <span class="n">ec</span><span class="o">=</span><span class="s2">&quot;none&quot;</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.5</span><span class="p">))</span>
+                <span class="k">if</span> <span class="n">sort_gru_by_mean</span> <span class="ow">and</span> <span class="n">percent</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="n">ax</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="n">text_location</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">text_location</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">percent</span><span class="si">}</span><span class="s2">%&quot;</span><span class="p">,</span> <span class="n">transform</span><span class="o">=</span><span class="n">ax</span><span class="o">.</span><span class="n">transAxes</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="n">font_size</span><span class="p">,</span>
+                            <span class="n">verticalalignment</span><span class="o">=</span><span class="s1">&#39;top&#39;</span><span class="p">,</span> <span class="n">bbox</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">boxstyle</span><span class="o">=</span><span class="s2">&quot;round,pad=0.3&quot;</span><span class="p">,</span> <span class="n">fc</span><span class="o">=</span><span class="s2">&quot;white&quot;</span><span class="p">,</span> <span class="n">ec</span><span class="o">=</span><span class="s2">&quot;none&quot;</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.5</span><span class="p">))</span>
                 <span class="n">ax</span><span class="o">.</span><span class="n">set_xticks</span><span class="p">([])</span>
                 <span class="n">ax</span><span class="o">.</span><span class="n">set_yticks</span><span class="p">([])</span>
 
@@ -372,7 +406,12 @@
 
             <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">col</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">soil_layer_classes</span><span class="p">):</span>
                 <span class="n">ax</span> <span class="o">=</span> <span class="n">axes</span><span class="o">.</span><span class="n">flatten</span><span class="p">()[</span><span class="n">i</span><span class="p">]</span>
-                <span class="n">sub_agg_ddb_merged_gdf</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">column</span><span class="o">=</span><span class="n">col</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">,</span> <span class="n">cmap</span><span class="o">=</span><span class="n">cmap</span><span class="p">,</span> <span class="n">vmin</span><span class="o">=</span><span class="mf">0.01</span><span class="p">,</span> <span class="n">vmax</span><span class="o">=</span><span class="mi">100</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">vmin</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="n">vmin</span> <span class="o">=</span> <span class="n">sub_agg_ddb_merged_gdf</span><span class="p">[</span><span class="n">soil_layer_classes</span><span class="p">]</span><span class="o">.</span><span class="n">min</span><span class="p">()</span><span class="o">.</span><span class="n">min</span><span class="p">()</span>
+                <span class="k">if</span> <span class="n">vmax</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="n">vmax</span> <span class="o">=</span> <span class="n">sub_agg_ddb_merged_gdf</span><span class="p">[</span><span class="n">soil_layer_classes</span><span class="p">]</span><span class="o">.</span><span class="n">max</span><span class="p">()</span><span class="o">.</span><span class="n">max</span><span class="p">()</span>
+                <span class="n">sub_agg_ddb_merged_gdf</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">column</span><span class="o">=</span><span class="n">col</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">,</span> <span class="n">cmap</span><span class="o">=</span><span class="n">cmap</span><span class="p">,</span> <span class="n">vmin</span><span class="o">=</span><span class="n">vmin</span><span class="p">,</span> <span class="n">vmax</span><span class="o">=</span><span class="n">vmax</span><span class="p">)</span>
+
                 <span class="n">dissolved_basin</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">,</span> <span class="n">edgecolor</span><span class="o">=</span><span class="s1">&#39;black&#39;</span><span class="p">,</span> <span class="n">linewidth</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
                 <span class="n">ax</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="n">col</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="n">font_size</span><span class="p">,</span> <span class="n">ha</span><span class="o">=</span><span class="s1">&#39;center&#39;</span><span class="p">)</span>
                 <span class="n">ax</span><span class="o">.</span><span class="n">set_xticks</span><span class="p">([])</span>
@@ -391,12 +430,18 @@
         <span class="n">fig</span><span class="o">.</span><span class="n">subplots_adjust</span><span class="p">(</span><span class="o">**</span><span class="n">subplot_adjustments</span><span class="p">)</span>
 
     <span class="c1"># Set default values for vmin and vmax</span>
-    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">dims</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
-        <span class="n">vmin</span><span class="p">,</span> <span class="n">vmax</span> <span class="o">=</span> <span class="n">sub_agg_ddb_merged_gdf</span><span class="p">[</span><span class="n">variable_name</span><span class="p">]</span><span class="o">.</span><span class="n">min</span><span class="p">(),</span> <span class="n">sub_agg_ddb_merged_gdf</span><span class="p">[</span><span class="n">variable_name</span><span class="p">]</span><span class="o">.</span><span class="n">max</span><span class="p">()</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="n">vmin</span> <span class="o">=</span> <span class="mf">0.01</span>
-        <span class="n">vmax</span> <span class="o">=</span> <span class="mi">1</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">dims</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span> <span class="ow">and</span> <span class="n">dims</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="n">grudim</span> <span class="k">else</span> <span class="mi">100</span>  <span class="c1"># Set vmax based on the condition</span>
-
+    <span class="c1"># if vmin is None or vmax is None:</span>
+    <span class="c1">#     if len(dims) == 1:</span>
+    <span class="c1">#         if vmin is None:</span>
+    <span class="c1">#             vmin = sub_agg_ddb_merged_gdf[variable_name].min()</span>
+    <span class="c1">#         if vmax is None:</span>
+    <span class="c1">#             vmax = sub_agg_ddb_merged_gdf[variable_name].max()</span>
+    <span class="c1">#     elif len(dims) == 2 and dims[1] == grudim:</span>
+    <span class="c1">#         vmin = 0.01 if vmin is None else vmin</span>
+    <span class="c1">#         vmax = 1 if vmax is None else vmax</span>
+    <span class="c1">#     elif len(dims) == 2 and dims[1] == soldim:</span>
+    <span class="c1">#         vmin = 0.01 if vmin is None else vmin</span>
+    <span class="c1">#         vmax = 100 if vmax is None else vmax</span>
     <span class="c1"># Colorbar setup</span>
     <span class="n">cbar_ax</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">add_axes</span><span class="p">(</span><span class="n">cbar_location</span><span class="p">)</span>
     <span class="n">sm</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">cm</span><span class="o">.</span><span class="n">ScalarMappable</span><span class="p">(</span><span class="n">cmap</span><span class="o">=</span><span class="n">cmap</span><span class="p">,</span> <span class="n">norm</span><span class="o">=</span><span class="n">mcolors</span><span class="o">.</span><span class="n">Normalize</span><span class="p">(</span><span class="n">vmin</span><span class="o">=</span><span class="n">vmin</span><span class="p">,</span> <span class="n">vmax</span><span class="o">=</span><span class="n">vmax</span><span class="p">))</span>
