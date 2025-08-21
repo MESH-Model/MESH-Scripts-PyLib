@@ -156,7 +156,13 @@ def save_mesh_outputs_as_png(
                 # original value in df (aligned by ID from the DDB array)
                 orig_val = df.loc[df['ID'] == sid, 'value'].values[0]
                 # merged value on the GeoDataFrame
-                merged_val = merged.loc[merged[comid_field] == sid, 'value'].values[0]
+                # merged_val = merged.loc[merged[comid_field] == sid, 'value'].values[0]
+                match = df.loc[df['ID'] == sid, 'value']
+                if match.empty:
+                    print(f" COMID {sid} not found in df['ID']")
+                    orig_val = np.nan
+                else:
+                    orig_val = match.values[0]     
                 print(f" COMID {sid}: original={orig_val} ⟶ merged={merged_val}")
             print("──────── end spot-check ────────\n")
             # ────────────────────────────────────────
@@ -172,7 +178,7 @@ def save_mesh_outputs_as_png(
 
             # Determine the date label based on mode and index
             if mode == 'yearly':
-                date = starting_date + timedelta(days=365 * idx)
+                date = starting_date + timedelta(days=365.25 * idx)
                 label = date.strftime('%Y')
             elif mode == 'monthly':
                 date = starting_date + timedelta(days=30 * idx)

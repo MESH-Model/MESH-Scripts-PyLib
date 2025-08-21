@@ -49,6 +49,7 @@ import requests
 from owslib.ogcapi.features import Features
 from datetime import datetime, timedelta, timezone
 import time
+from typing import Optional
 
 class GenStreamflowFile:
     def __init__(self):
@@ -354,16 +355,17 @@ class GenStreamflowFile:
 
     def fetch_hydrometric_realtime_full_range(
         self,
-        station_numbers,
+        station_numbers: list[str],
         start: str,
         end: str,
         window_days: int = 1,
-        freq_hours: int = 1,
+        freq_hours: Optional[int] = None,
         limit: int = 1000
-    ):
+    ) -> tuple[pd.DataFrame, list[dict]]:
         """
-        Fetches hourly provisional (real-time) discharge by slicing [start,end] into
-        `window_days`-day windows and resampling to `freq_hours`.
+        Fetches provisional real-time discharge by slicing [start,end] into
+        `window_days`-day windows. If `freq_hours` is given, the result is
+        resampled to that interval; otherwise you get the native timestamps.
         """
         base_url = "https://api.weather.gc.ca/collections/hydrometric-realtime/items"
         headers = {"Accept": "application/geo+json"}
@@ -416,12 +418,13 @@ class GenStreamflowFile:
                 continue
             df = (pd.DataFrame(recs, columns=["DateTime", st])
                     .drop_duplicates("DateTime")
-                    .set_index("DateTime")
-                    .resample(f"{freq_hours}H")
-                    .mean())
+                    .set_index("DateTime"))
+            if freq_hours is not None:
+                df = df.resample(f"{freq_hours}h").mean()
             df_all = df if df_all.empty else df_all.join(df, how="outer")
 
         df_all.index.name = "DateTime"
+        df_all = df_all.sort_index().sort_index(axis=1)
         meta_list = list(meta.values())
         for st in station_numbers:
             if st not in meta:
